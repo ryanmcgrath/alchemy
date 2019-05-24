@@ -1,4 +1,4 @@
-[![Alchemy](https://github.com/ryanmcgrath/alchemy/blob/master/assets/alchemy_logo_250x.png?raw=true)](https://alchemy.rs)
+[![Alchemy](https://github.com/ryanmcgrath/alchemy/blob/trunk/assets/alchemy_logo_250x.png?raw=true)](https://alchemy.rs)
 
 A Rust GUI Framework
 ==========================================================
@@ -82,7 +82,7 @@ fn main() {
         window: Window::new("Le Appy App", (0., 0., 600., 600.), WindowState {})
     });
 }
-``
+```
 
 ## Does it support custom Components?
 Alchemy implements the React component lifecycle. It does not (currently) implement Hooks, and may or may not implement them in the future. The class-based lifecycle maps fairly well to Rust idioms already, as you really never wanted to subclass in React anyway.
