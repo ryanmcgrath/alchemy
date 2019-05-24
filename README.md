@@ -1,4 +1,4 @@
-[![Alchemy](https://github.com/ryanmcgrath/alchemy/blob/trunk/assets/alchemy_logo_250x.png?raw=true | width=100)](https://alchemy.rs)
+<a href="https://alchemy.rs/" title="Alchemy - A Rust GUI Framework"><img src="https://github.com/ryanmcgrath/alchemy/blob/trunk/assets/alchemy_logo_125x.png?raw=true" width="125" alt="Potion" /></a>
 
 A Rust GUI Framework
 ==========================================================
