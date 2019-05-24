@@ -1,0 +1,35 @@
+[package]
+name = "alchemy"
+description = "A cross-platform GUI framework written in Rust. Adapts to native view-layers on each platform. UIKit/React inspired."
+version = "0.2.0"
+edition = "2018"
+authors = ["Ryan McGrath <ryan@rymc.io>"]
+license = "MPL-2.0+"
+repository = "https://github.com/ryanmcgrath/alchemy"
+categories = ["gui", "rendering::engine", "multimedia"]
+keywords = ["gui", "css", "styles", "layout", "react"]
+
+[badges]
+maintenance = { status = "actively-developed" }
+
+[features]
+cocoa = ["alchemy-cocoa", "alchemy-lifecycle/cocoa"]
+
+[dependencies]
+alchemy-cocoa = { version = "0.1", path = "../cocoa", optional = true }
+alchemy-lifecycle = { version = "0.1", path = "../lifecycle" }
+alchemy-macros = { version = "0.1", path = "../macros" }
+alchemy-styles = { version = "0.1", path = "../styles", features = ["parser"] }
+mime = "0.3.13"
+htmlescape = "0.3.1"
+language-tags = "0.2.2"
+lazy_static = "1.3"
+matches = "0.1"
+phf = "0.7"
+proc-macro-hack = "0.5.4"
+proc-macro-nested = "0.1.3"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1"
+strum = "0.15.0"
+strum_macros = "0.15.0"
+toml = "0.5"

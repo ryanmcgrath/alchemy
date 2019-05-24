@@ -1,0 +1,12 @@
+[workspace]
+members = [
+    "styles",
+    "macros",
+    "lifecycle",
+    "alchemy",
+    "examples/layout"
+]
+
+[profile.release]
+lto = true
+panic = "abort"
