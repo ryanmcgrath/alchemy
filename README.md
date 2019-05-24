@@ -1,6 +1,6 @@
 <a href="https://alchemy.rs/" title="Alchemy - A Rust GUI Framework"><img src="https://github.com/ryanmcgrath/alchemy/blob/trunk/assets/alchemy_logo_250x.png?raw=true" width="125" alt="Potion" /></a>
 
-A Rust GUI Framework
+Alchemy - A Rust GUI Framework
 ==========================================================
 
 [![Gitter](https://badges.gitter.im/alchemy-rs/alchemy.svg)](https://gitter.im/alchemy-rs/alchemy)
@@ -19,7 +19,7 @@ Alchemy will, ideally, support the platforms listed below. At the moment, the `C
 - `cocoa-touch`, which provides backing widgets, windows and assorted frameworks for `iOS`.
 - `gtk`, which affords a `GTK` layer. This is mostly intended for GNOME users; if you'd like to run it elsewhere, you're on your own.
 - `qt`, which affords a `Qt` layer. This is mostly indended for `KDE` users; if you'd like to run it elsewhere, you're on your own.
-- `uwp`, which affords a `"UWP"` layer for Microsoft platforms that support it. This is a bit of a hack, provided by linking into the [microsoft/WinObjC](https://github.com/Microsoft/WinObjC/) framework, originally inteded for porting `iOS` applications to `UWP`. Down the road, if or when a proper `UWP` library for Rust surfaces, I'd be happy to look at replacing this.
+- `uwp`, which affords a `"UWP"` layer for Microsoft platforms that support it. This is a bit of a hack, provided by linking into the [microsoft/WinObjC](https://github.com/Microsoft/WinObjC/) framework, originally intended for porting `iOS` applications to `UWP`. Down the road, if or when a proper `UWP` library for Rust surfaces, I'd be happy to look at replacing this.
 
 Support for more platforms is desired - for example, I think an [`OrbTk`](https://gitlab.redox-os.org/redox-os/orbtk) or [`Piston`](https://www.piston.rs) backend could be cool to see. A [`winapi-rs`](https://github.com/retep998/winapi-rs) backend could be cool, too!
 
@@ -67,8 +67,8 @@ fn main() {
             background-color: #307ace;
             width: 300;
             height: 300;
-            margin: 10;
-            padding: 10;
+            margin-top: 10;
+            padding-top: 10;
         }
 
         innerbox {
