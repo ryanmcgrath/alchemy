@@ -24,7 +24,7 @@ Support for more platforms is desired - for example, I think an [`OrbTk`](https:
 ## What Currently Works...?
 At the moment, the following is implemented:
 
-- A basic `cocoa` API, which implements the `Application` and `Window` lifecycles. `View`s are supported as well.
+- A basic `cocoa` API, which implements the `Application` and `Window` lifecycles. `<View />`, `<Text />`, and `<Fragment />` are supported as well.
 - A basic `reconciliation` module, which handles computing changes to the widget tree and applying them as necessary. It currently follows a design similar to React pre-16; I'm open to changing this if someone wants to collaborate.
 - A CSS parser, based on the work done over in [servo/servo](https://github.com/servo/servo). It doesn't support cascading, and follows an API closer to that of React Native's. This is intentional.
 - An RSX system, based on work done in [bodil/typed-html](https://github.com/bodil/typed-html) by Bodil Stokke. This was actually the project that made me circle back to the entire thing, too.
