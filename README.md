@@ -118,7 +118,7 @@ I'm dual licensing this, due to the licenses that some of the projects it depend
  * MIT License ([LICENSE-MIT](LICENSE-MIT.md) or https://opensource.org/licenses/MIT)
 
 ### Contributing
-Before contributing, please read the [contributors guide](https://github.com/ryanmcgrath/alchemy/blob/master/CONTRIBUTING.md) 
+Before contributing, please read the [contributors guide](https://github.com/ryanmcgrath/alchemy/blob/trunk/CONTRIBUTING.md) 
 for useful information about setting up Alchemy locally, coding style and common abbreviations.
 
 Unless you explicitly state otherwise, any contribution you intentionally submit

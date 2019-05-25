@@ -5,7 +5,7 @@ your suggestions, bug reports, and pull requests and so on.
 
 *Note:* Anyone who interacts with Alchemy in any space, including but not
 limited to this GitHub repository, must follow our [code of
-conduct](https://github.com/ryanmcgrath/alchemy/blob/master/code_of_conduct.md).
+conduct](https://github.com/ryanmcgrath/alchemy/blob/trunk/code_of_conduct.md).
 
 
 ## Submitting bug reports
