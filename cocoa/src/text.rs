@@ -8,7 +8,7 @@ use objc::{msg_send, sel, sel_impl};
 use objc::declare::ClassDecl;
 use objc::runtime::{Class, Object, Sel, BOOL};
 
-use cocoa::base::{id, nil, YES};
+use cocoa::base::{id, nil, YES, NO};
 use cocoa::foundation::{NSRect, NSPoint, NSSize, NSString};
 
 use crate::color::IntoNSColor;
@@ -29,8 +29,7 @@ pub struct Text {
     inner_mut: Id<Object>,
     inner_share: ShareId<Object>,
     background_color: Id<Object>,
-    text_color: Id<Object>,
-    //text: Id<Object>
+    text_color: Id<Object>
 }
 
 impl Text {
@@ -39,22 +38,23 @@ impl Text {
     /// backed views for smoother scrolling.
     pub fn new() -> Text {
         let (inner_mut, inner_share) = unsafe {
-            let initial_string = NSString::alloc(nil).init_str("wut wut");
+            let initial_string = NSString::alloc(nil).init_str("");
             let view: id = msg_send![register_class(), labelWithString:initial_string];
             msg_send![view, setSelectable:YES];
             msg_send![view, setDrawsBackground:YES];
+            msg_send![view, setBezeled:NO];
+            msg_send![view, setEditable:NO];
             msg_send![view, setWantsLayer:YES];
             msg_send![view, setLayerContentsRedrawPolicy:1];
             let x = view.clone();
-            (Id::from_ptr(view), ShareId::from_ptr(x)) //, Id::from_ptr(initial_string))
+            (Id::from_ptr(view), ShareId::from_ptr(x))
         };
 
         Text {
             inner_mut: inner_mut,
             inner_share: inner_share,
             background_color: Color::transparent().into_nscolor(),
-            text_color: Color::transparent().into_nscolor(),
-       //     text: s
+            text_color: Color::transparent().into_nscolor()
         }
     }
 
