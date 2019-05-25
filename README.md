@@ -21,7 +21,7 @@ Alchemy will, ideally, support the platforms listed below. At the moment, the `C
 - `qt`, which affords a `Qt` layer. This is mostly indended for `KDE` users; if you'd like to run it elsewhere, you're on your own.
 - `uwp`, which affords a `"UWP"` layer for Microsoft platforms that support it. This is a bit of a hack, provided by linking into the [microsoft/WinObjC](https://github.com/Microsoft/WinObjC/) framework, originally intended for porting `iOS` applications to `UWP`. Down the road, if or when a proper `UWP` library for Rust surfaces, I'd be happy to look at replacing this.
 
-Support for more platforms is desired - for example, I think an [`OrbTk`](https://gitlab.redox-os.org/redox-os/orbtk) or [`Piston`](https://www.piston.rs) backend could be cool to see. A [`winapi-rs`](https://github.com/retep998/winapi-rs) backend could be cool, too!
+Support for more platforms is desired - for example, I think an [`OrbTk`](https://gitlab.redox-os.org/redox-os/orbtk) or [`Piston`](https://www.piston.rs) backend could be cool to see. A `web` backend would be awesome to support. A [`winapi-rs`](https://github.com/retep998/winapi-rs) backend could be cool, too!
 
 ## What Currently Works...?
 At the moment, the following is implemented:
@@ -78,19 +78,19 @@ fn main() {
         }
     });
 
-    alchemy::shared_app().run(AppState {
+    app.run(AppState {
         window: Window::new("Le Appy App", (0., 0., 600., 600.), WindowState {})
     });
 }
 ```
 
 ## Does it support custom Components?
-Alchemy implements the React component lifecycle. It does not (currently) implement Hooks, and may or may not implement them in the future. The class-based lifecycle maps fairly well to Rust idioms already, as you really never wanted to subclass in React anyway.
+Yes. Alchemy implements the React component lifecycle - although it does not (currently) implement Hooks, and may or may not implement them in the future. The class-based lifecycle maps fairly well to Rust idioms already, as you really never wanted to subclass in React anyway.
 
 A custom component would look like the following:
 
 ``` rust
-use alchemy::{Component, Error, rsx, RSX};
+use alchemy::{Component, Error, Props, rsx, RSX};
 
 pub struct MySpecialWidget {
     your_special_value_or_whatever: i32

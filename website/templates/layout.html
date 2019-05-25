@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="lt-ie9"><![endif]-->
+<!--[if gt IE 8]><!--><html><!--<![endif]-->
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>{% block title %}Alchemy - A Rust GUI Framework{% endblock %}</title>
+    <meta name="description" content="{% block meta_desc %}Alchemy enables interactive UIs in Rust. Design widgets for your app, and Alchemy will efficiently render with native widgets per-platform.{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}Alchemy - A Rust GUI Framework{% endblock %}">
+    <meta property="og:description" content="{% block og_desc %}Alchemy enables interactive UIs in Rust. Design widgets for your app, and Alchemy will efficiently render with native widgets per-platform.{% endblock %}">
+    <meta property="og:site_name" content="Alchemy - A Rust GUI Framework">
+    <meta property="og:image" content="{% block og_image %}https://rymc.io/img/avatar.png{% endblock %}">
+    <meta property="og:locale" content="en_US">
+    <meta name="twitter:site" content="@ryanmcgrath">
+    <meta name="twitter:creator" content="@ryanmcgrath">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:description" content="{% block twitter_desc %}Alchemy enables interactive UIs in Rust. Design widgets for your app, and Alchemy will efficiently render with native widgets per-platform.{% endblock %}">
+    <link rel="manifest" href="/icons/manifest.json">
+    <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#131414">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Alchemy">
+    <meta name="application-name" content="Alchemy">
+    <meta http-equiv="cleartype" content="on">
+    <meta name="theme-color" content="#131414">
+    <link rel="apple-touch-icon-precomposed" sizes="57x57" href="https://alchemy.rs/favicons/apple-touch-icon-57x57.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="https://alchemy.rs/favicons/apple-touch-icon-114x114.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="https://alchemy.rs/favicons/apple-touch-icon-72x72.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://alchemy.rs/favicons/apple-touch-icon-144x144.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="60x60" href="https://alchemy.rs/favicons/apple-touch-icon-60x60.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="120x120" href="https://alchemy.rs/favicons/apple-touch-icon-120x120.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="76x76" href="https://alchemy.rs/favicons/apple-touch-icon-76x76.png" />
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="https://alchemy.rs/favicons/apple-touch-icon-152x152.png" />
+    <link rel="icon" type="image/png" href="https://alchemy.rs/favicons/favicon-196x196.png" sizes="196x196" />
+    <link rel="icon" type="image/png" href="https://alchemy.rs/favicons/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/png" href="https://alchemy.rs/favicons/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="https://alchemy.rs/favicons/favicon-16x16.png" sizes="16x16" />
+    <link rel="icon" type="image/png" href="https://alchemy.rs/favicons/favicon-128.png" sizes="128x128" />
+    <meta name="application-name" content="Alchemy - A Rust GUI Framework"/>
+    <meta name="msapplication-TileColor" content="#131414" />
+    <meta name="msapplication-TileImage" content="https://alchemy.rs/favicons/mstile-144x144.png" />
+    <meta name="msapplication-square70x70logo" content="https://alchemy.rs/favicons/mstile-70x70.png" />
+    <meta name="msapplication-square150x150logo" content="https://alchemy.rs/favicons/mstile-150x150.png" />
+    <meta name="msapplication-wide310x150logo" content="https://alchemy.rs/favicons/mstile-310x150.png" />
+    <meta name="msapplication-square310x310logo" content="https://alchemy.rs/favicons/mstile-310x310.png" />
+    <link type="text/plain" rel="author" href="/humans.txt" />
+    <link href="/rss.xml" rel="alternate" title="" type="application/rss+xml">
+    <!--[if lte IE 8]>
+    (function(i,e){for(;i<10;i++)document.createElement(e[i]);})(0,['section','article','aside','header','footer','nav','figure','figcaption','time','mark']);
+    <![endif]-->
+    {% set reset = load_data(path="static/css/reset.css", format="plain") %}
+    {% set layout = load_data(path="static/css/layout.css", format="plain") %}
+    <style type="text/css">{{ reset|safe }}{{ layout|safe }}{% block css %}{% endblock %}</style>
+</head>
+<body>
+    <img src="/images/banner.png" alt="Alchemy" id="banner" />
+
+    {% block content %}{% endblock %}
+
+    <footer>Created by <a href="https://rymc.io/">Ryan McGrath</a>. A more complete site for this project will come later. :)</footer>
+
+    {% block js %}{% endblock %}
+    <script type="application/ld+json"> {
+        "@context" : "https://schema.org",
+        "@type" : "SoftwareSourceCode",
+        "codeRepository": "https://github.com/ryanmcgrath/alchemy/",
+        "programmingLanguage": "rust",
+        "name" : "Alchemy - A Rust GUI Framework",
+        "url" : "https://alchemy.rs/",
+        "sameAs" : ["https://crates.io/crates/alchemy", "https://docs.rs/alchemy/"]
+    } </script>
+</body>
+</html>
