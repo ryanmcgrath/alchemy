@@ -129,7 +129,7 @@ pub fn diff_and_patch_tree(old: RSX, new: RSX, stretch: &mut Stretch, depth: usi
                 match old_element.children.pop() {
                     Some(child) => {
                         if let RSX::VirtualNode(mut old_child) = child {
-                            unmount_component_tree(&mut old_child)?;
+                            unmount_component_tree(&mut old_child, stretch)?;
                         }
                     },
 
@@ -310,12 +310,12 @@ fn mount_component_tree(mut new_element: VirtualNode, stretch: &mut Stretch) -> 
 ///
 /// This fires the hooks from a recursive inward-out pattern; that is, the deepest nodes in the tree
 /// are the first to go, ensuring that everything is properly cleaned up.
-fn unmount_component_tree(old_element: &mut VirtualNode) -> Result<(), Box<Error>> {
+fn unmount_component_tree(old_element: &mut VirtualNode, stretch: &mut Stretch) -> Result<(), Box<Error>> {
     // We only need to recurse on VirtualNodes. Text and so on will automagically drop
     // because we don't support freeform text, it has to be inside a <Text> at all times.
     for child in old_element.children.iter_mut() {
         if let RSX::VirtualNode(child_element) = child {
-            unmount_component_tree(child_element)?;
+            unmount_component_tree(child_element, stretch)?;
         }
     }
 
@@ -323,7 +323,8 @@ fn unmount_component_tree(old_element: &mut VirtualNode) -> Result<(), Box<Error
     // graph. Remember that a Component can actually not necessarily have a native backing
     // node, hence our necessary check.
     if let Some(old_component) = &mut old_element.instance {
-        //old_component.component_will_unmount();
+        let mut component = old_component.write().unwrap();
+        component.component_will_unmount(&old_element.props);
 
         /*if let Some(view) = old_component.get_native_backing_node() {
             if let Some(native_view) = replace_native_view {
@@ -337,7 +338,7 @@ fn unmount_component_tree(old_element: &mut VirtualNode) -> Result<(), Box<Error
     // Rather than try to keep track of parent/child stuff for removal... just obliterate it,
     // the underlying library does a good job of killing the links anyway.
     if let Some(layout_node) = &mut old_element.layout_node {
-        //layout_node.set_children(vec![]);
+        stretch.set_children(*layout_node, vec![])?;
     }
 
     Ok(())
