@@ -1,9 +1,5 @@
-//! render/diff.rs
-//!
 //! Implements tree diffing, and attempts to cache Component instances where
 //! possible.
-//!
-//! @created 05/03/2019
 
 use std::error::Error;
 use std::mem::{discriminant, swap};
@@ -14,6 +10,7 @@ use alchemy_styles::styles::Style;
 use alchemy_lifecycle::traits::Component;
 use alchemy_lifecycle::rsx::{StylesList, RSX, VirtualNode};
 
+/// Given two node trees, will compare, diff, and apply changes in a recursive fashion. 
 pub fn diff_and_patch_tree(old: RSX, new: RSX, stretch: &mut Stretch, depth: usize) -> Result<RSX, Box<Error>> {
     // Whether we replace or not depends on a few things. If we're working on two different node
     // types (text vs node), if the node tags are different, or if the key (in some cases) is
@@ -76,8 +73,8 @@ pub fn diff_and_patch_tree(old: RSX, new: RSX, stretch: &mut Stretch, depth: usi
                 }
             }
 
-            // This None path should never be hit. If it does, the algorithm is doing something way
-            // off base.
+            // This None path should never be hit, we just need to use a rather verbose pattern
+            // here. It's unsightly, I know.
             let is_native_backed = match &new_element.instance {
                 Some(instance) => instance.has_native_backing_node(),
                 None => false
@@ -86,13 +83,17 @@ pub fn diff_and_patch_tree(old: RSX, new: RSX, stretch: &mut Stretch, depth: usi
             // There is probably a nicer way to do this that doesn't allocate as much, and I'm open
             // to revisiting it. Platforms outside of Rust allocate far more than this, though, and
             // in general the whole "avoid allocations" thing is fear mongering IMO. Revisit later.
+            //
+            // tl;dr we allocate a new Vec<RSX> that's equal to the length of our new children, and
+            // then swap it on our (owned) node... it's safe, as we own it. This allows us to
+            // iterate and dodge the borrow checker.
             let mut children: Vec<RSX> = Vec::with_capacity(new_element.children.len());
             std::mem::swap(&mut children, &mut new_element.children);
             
             old_element.children.reverse();
             for new_child_tree in children {
                 match old_element.children.pop() {
-                    // A matching child in the old tree means we can pass right back into the
+                    // A matching child in the old tree means we can recurse right back into the
                     // update phase.
                     Some(old_child_tree) => {
                         let updated = diff_and_patch_tree(old_child_tree, new_child_tree, stretch, depth + 1)?;
@@ -108,9 +109,7 @@ pub fn diff_and_patch_tree(old: RSX, new: RSX, stretch: &mut Stretch, depth: usi
                             // Link the layout nodes, handle the appending, etc.
                             // This happens inside mount_component_tree, but that only handles that
                             // specific tree. Think of this step as joining two trees in the graph.
-
                             if is_native_backed {
-                                println!("Linking 1");
                                 find_and_link_layout_nodes(&mut new_element, &mut mounted, stretch)?;
                             }
                             
@@ -139,13 +138,8 @@ pub fn diff_and_patch_tree(old: RSX, new: RSX, stretch: &mut Stretch, depth: usi
         }
         
         // We're comparing two text nodes. Realistically... this requires nothing from us, because
-        // the <Text> tag should handle it. We'll do a quick sanity check to make sure that it
-        // actually has a parent <Text>, though.
+        // the <Text> tag (or any other component instance, if it desires) should handle it.
         (RSX::VirtualText(_), RSX::VirtualText(text)) => {
-            //match &parent {
-            //    RSX::VirtualText(_) => { panic!("Raw text must be surrounded by a <Text></Text> component!"); },
-            //    _ => {}
-            // }
             Ok(RSX::VirtualText(text))
         }
 
@@ -178,30 +172,28 @@ fn configure_styles(style_keys: &StylesList, style: &mut Style) {
 }
 
 /// Walks the tree and applies styles. This happens after a layout computation, typically.
-pub(crate) fn walk_and_apply_styles(node: &VirtualNode, layout_manager: &mut Stretch) {
+pub(crate) fn walk_and_apply_styles(node: &VirtualNode, layout_manager: &mut Stretch) -> Result<(), Box<Error>> {
     if let (Some(layout_node), Some(instance)) = (node.layout_node, &node.instance) {
-        match (layout_manager.layout(layout_node), layout_manager.style(layout_node)) {
-            (Ok(layout), Ok(style)) => { instance.apply_styles(layout, style); },
-            (Err(e), Err(e2)) => { eprintln!("Error retrieving computed style? {:?} {:?}", e, e2); },
-            _ => { eprintln!("Error retrieving computed style!"); }
-        }
+        instance.apply_styles(
+            layout_manager.layout(layout_node)?,
+            layout_manager.style(layout_node)?
+        );
     }
 
     for child in &node.children {
-        println!("IN CHILD!");
         if let RSX::VirtualNode(child_node) = child {
-            walk_and_apply_styles(child_node, layout_manager);
+            walk_and_apply_styles(child_node, layout_manager)?;
         }
     }
+
+    Ok(())
 }
 
 /// Given a tree, will walk the branches until it finds the next root nodes to connect.
 /// While this sounds slow, in practice it rarely has to go far in any direction.
 fn find_and_link_layout_nodes(parent_node: &mut VirtualNode, child_tree: &mut VirtualNode, stretch: &mut Stretch) -> Result<(), Box<Error>> {
-    // First, check if the tree has a layout node we can use...
     if let (Some(parent_instance), Some(child_instance)) = (&mut parent_node.instance, &mut child_tree.instance) {
         if let (Some(parent_layout_node), Some(child_layout_node)) = (&parent_node.layout_node, &child_tree.layout_node) {
-            println!("--- LINKING");
             stretch.add_child(*parent_layout_node, *child_layout_node)?;
             parent_instance.append_child_component(child_instance);
             return Ok(());
@@ -222,7 +214,6 @@ fn find_and_link_layout_nodes(parent_node: &mut VirtualNode, child_tree: &mut Vi
 /// passes are configured.
 fn mount_component_tree(mut new_element: VirtualNode, stretch: &mut Stretch) -> Result<VirtualNode, Box<Error>> {
     let mut instance = (new_element.create_component_fn)();
-    println!("> Mounting {}", new_element.tag);
     // "compute" props, set on instance
     // instance.get_derived_state_from_props(props)
 

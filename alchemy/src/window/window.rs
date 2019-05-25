@@ -113,7 +113,7 @@ impl AppWindow {
     /// async, so relying on underlying behavior in here is considered... suspect.
     ///
     /// This method is called on window resize and show events.
-    pub fn configure_and_apply_styles(&mut self) {
+    fn configure_and_apply_styles(&mut self) -> Result<(), Box<std::error::Error>> {
         let window_size = Size {
             width: Number::Defined(600.),
             height: Number::Defined(600.)
@@ -121,12 +121,12 @@ impl AppWindow {
 
         if let RSX::VirtualNode(root_node) = &mut self.root_node {
             if let Some(layout_node) = &root_node.layout_node {
-                match &self.layout.compute_layout(*layout_node, window_size) {
-                    Ok(_) => { walk_and_apply_styles(&root_node, &mut self.layout); },
-                    Err(e) => { eprintln!("Error computing layout: {:?}", e); }
-                }
+                self.layout.compute_layout(*layout_node, window_size)?;
+                walk_and_apply_styles(&root_node, &mut self.layout)?;
             }
         }
+
+        Ok(())
     }
 
     /// Renders and calls through to the native platform window show method.
