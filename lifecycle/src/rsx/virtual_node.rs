@@ -1,7 +1,7 @@
 //! Implements the `RSX::VirtualNode` struct, which is a bit of a recursive
 //! structure.
 
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 use std::fmt::{Display, Debug};
 
 use alchemy_styles::node::Node;
@@ -19,11 +19,11 @@ pub struct VirtualNode {
 
     /// `Component` instances are created on-demand, if the reconciler deems it be so. This
     /// is a closure that should return an instance of the correct type.
-    pub create_component_fn: Arc<Fn() -> Box<Component> + Send + Sync + 'static>,
+    pub create_component_fn: Arc<Fn() -> Arc<RwLock<Component>> + Send + Sync + 'static>,
 
     /// A cached component instance, which is transferred between trees. Since `Component` 
     /// instances are lazily created, this is an `Option`, and defaults to `None`.
-    pub instance: Option<Arc<Component>>,
+    pub instance: Option<Arc<RwLock<Component>>>,
 
     /// A cached `Node` for computing `Layout` with `Stretch`. Some components may not have
     /// a need for layout (e.g, if they don't have a backing node), and thus this is optional.

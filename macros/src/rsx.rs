@@ -220,7 +220,9 @@ impl Element {
         let component_name = Literal::string(&typename.to_string());
 
         Ok(quote!(
-            alchemy::RSX::node(#component_name, || Box::new(#typename::default()), alchemy::Props {
+            alchemy::RSX::node(#component_name, || {
+                std::sync::Arc::new(std::sync::RwLock::new(#typename::default()))
+            }, alchemy::Props {
                 attributes: {
                     let mut attributes = std::collections::HashMap::new();
                     #attributes

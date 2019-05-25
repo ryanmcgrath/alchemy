@@ -85,7 +85,7 @@ pub trait Component: Send + Sync {
 
     /// If you implement a Native-backed component, you'll need to implement this. Given a
     /// `component`, you need to instruct the system how to append it to the tree at your point.
-    fn append_child_component(&self, _component: &Arc<Component>) {}
+    fn append_child_component(&self, _component: &Component) {}
 
     /// If you implement a Native-backed component, you'll need to implement this. Given a
     /// `component`, you need to instruct the system how to replace it in the tree at your point.

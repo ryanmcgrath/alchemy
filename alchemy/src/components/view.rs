@@ -3,7 +3,7 @@
 //! hence why they're all (somewhat annoyingly, but lovingly) re-implemented 
 //! as bridges.
 
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, RwLock};
 
 use alchemy_styles::styles::{Layout, Style};
 
@@ -40,7 +40,7 @@ impl Component for View {
         Some(bridge.borrow_native_backing_node())
     }
 
-    fn append_child_component(&self, component: &Arc<Component>) {
+    fn append_child_component(&self, component: &Component) {
         if let Some(child) = component.borrow_native_backing_node() {
             let mut bridge = self.0.lock().unwrap();
             bridge.append_child(child);
@@ -53,7 +53,7 @@ impl Component for View {
     }
 
     fn render(&self, props: &Props) -> Result<RSX, Error> {
-        Ok(RSX::node("Fragment", || Box::new(Fragment::default()), Props {
+        Ok(RSX::node("Fragment", || Arc::new(RwLock::new(Fragment::default())), Props {
             attributes: std::collections::HashMap::new(),
             key: "".into(),
             styles: StylesList::new(),

@@ -1,7 +1,7 @@
 //! Implements the Window API. It attempts to provide a nice, common interface across
 //! per-platform Window APIs.
 
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, RwLock};
 
 use alchemy_lifecycle::traits::{Component, WindowDelegate};
 use alchemy_lifecycle::rsx::{Props, RSX};
@@ -19,11 +19,11 @@ use crate::reconciler::{diff_and_patch_tree, walk_and_apply_styles};
 use alchemy_cocoa::window::{Window as PlatformWindowBridge};
 
 /// Utility function for creating a root_node.
-fn create_root_node(instance: Option<Arc<Component>>, layout_manager: &mut Stretch) -> RSX {
+fn create_root_node(instance: Option<Arc<RwLock<Component>>>, layout_manager: &mut Stretch) -> RSX {
     let mut props = Props::default();
     props.styles = "root".into();
     
-    let mut root_node = RSX::node("root", || Box::new(View::default()), props);
+    let mut root_node = RSX::node("root", || Arc::new(RwLock::new(View::default())), props);
     
     if let RSX::VirtualNode(root) = &mut root_node {
         root.layout_node = match instance.is_some() {
@@ -159,7 +159,7 @@ impl Window {
             title: title.into(),
             bridge: bridge,
             delegate: Box::new(delegate),
-            root_node: create_root_node(Some(Arc::new(view)), &mut layout),
+            root_node: create_root_node(Some(Arc::new(RwLock::new(view))), &mut layout),
             layout: layout
         })))
     }

@@ -76,7 +76,10 @@ pub fn diff_and_patch_tree(old: RSX, new: RSX, stretch: &mut Stretch, depth: usi
             // This None path should never be hit, we just need to use a rather verbose pattern
             // here. It's unsightly, I know.
             let is_native_backed = match &new_element.instance {
-                Some(instance) => instance.has_native_backing_node(),
+                Some(instance) => {
+                    let lock = instance.read().unwrap();
+                    lock.has_native_backing_node()
+                },
                 None => false
             };
 
@@ -174,7 +177,8 @@ fn configure_styles(style_keys: &StylesList, style: &mut Style) {
 /// Walks the tree and applies styles. This happens after a layout computation, typically.
 pub(crate) fn walk_and_apply_styles(node: &VirtualNode, layout_manager: &mut Stretch) -> Result<(), Box<Error>> {
     if let (Some(layout_node), Some(instance)) = (node.layout_node, &node.instance) {
-        instance.apply_styles(
+        let component = instance.write().unwrap();
+        component.apply_styles(
             layout_manager.layout(layout_node)?,
             layout_manager.style(layout_node)?
         );
@@ -195,7 +199,9 @@ fn find_and_link_layout_nodes(parent_node: &mut VirtualNode, child_tree: &mut Vi
     if let (Some(parent_instance), Some(child_instance)) = (&mut parent_node.instance, &mut child_tree.instance) {
         if let (Some(parent_layout_node), Some(child_layout_node)) = (&parent_node.layout_node, &child_tree.layout_node) {
             stretch.add_child(*parent_layout_node, *child_layout_node)?;
-            parent_instance.append_child_component(child_instance);
+            if let (parent_component, child_component) = (parent_instance.write().unwrap(), child_instance.read().unwrap()) {
+                parent_component.append_child_component(&*child_component);
+            }
             return Ok(());
         }
     }
@@ -213,25 +219,30 @@ fn find_and_link_layout_nodes(parent_node: &mut VirtualNode, child_tree: &mut Vi
 /// view tree, firing various lifecycle methods, and ensuring that nodes for layout
 /// passes are configured.
 fn mount_component_tree(mut new_element: VirtualNode, stretch: &mut Stretch) -> Result<VirtualNode, Box<Error>> {
-    let mut instance = (new_element.create_component_fn)();
-    // "compute" props, set on instance
-    // instance.get_derived_state_from_props(props)
+    let instance = (new_element.create_component_fn)();
 
-    let is_native_backed = instance.has_native_backing_node();
-
-    if is_native_backed {
-        let mut style = Style::default();
-        configure_styles(&new_element.props.styles, &mut style);
-        
-        let layout_node = stretch.new_node(style, vec![])?;
-        new_element.layout_node = Some(layout_node);
-    }
+    let mut is_native_backed = false;
     
-    let x: std::sync::Arc<Component> = instance.into();
-    let renderer = x.clone();
-    new_element.instance = Some(x);
+    let rendered = {
+        let component = instance.read().unwrap();
+        // instance.get_derived_state_from_props(props)
 
-    let mut children = match renderer.render(&new_element.props) {
+        is_native_backed = component.has_native_backing_node();
+
+        if is_native_backed {
+            let mut style = Style::default();
+            configure_styles(&new_element.props.styles, &mut style);
+            
+            let layout_node = stretch.new_node(style, vec![])?;
+            new_element.layout_node = Some(layout_node);
+        }
+        
+        component.render(&new_element.props)
+    };
+        
+    new_element.instance = Some(instance);
+
+    let mut children = match rendered {
         Ok(opt) => match opt {
             RSX::VirtualNode(child) => {
                 let mut children = vec![];
@@ -241,27 +252,21 @@ fn mount_component_tree(mut new_element: VirtualNode, stretch: &mut Stretch) -> 
                 // tag similar to what React does, which just hoists the children out of it and
                 // discards the rest.
                 if child.tag == "Fragment" {
-                    println!("    > In Fragment");
                     for child_node in child.props.children {
                         if let RSX::VirtualNode(node) = child_node {
                             let mut mounted = mount_component_tree(node, stretch)?;
                             
-                            println!("        > Mounted Fragment...");
                             if is_native_backed {
-                                println!("        > Linking Fragment: {} {}", new_element.tag, mounted.tag);
                                 find_and_link_layout_nodes(&mut new_element, &mut mounted, stretch)?;
                             }
 
                             children.push(RSX::VirtualNode(mounted)); 
-                        } else {
-                            println!("    > Mounting other type of node...");
                         }
                     }
                 } else {
                     let mut mounted = mount_component_tree(child, stretch)?;
                     
                     if is_native_backed {
-                        println!("Linking Child");
                         find_and_link_layout_nodes(&mut new_element, &mut mounted, stretch)?;
                     }
 
@@ -288,13 +293,14 @@ fn mount_component_tree(mut new_element: VirtualNode, stretch: &mut Stretch) -> 
 
     new_element.children.append(&mut children);
     
+    if let Some(instance) = &mut new_element.instance {
+        let mut component = instance.write().unwrap();
+        component.component_did_mount(&new_element.props);
+    }
+    
     // instance.get_snapshot_before_update()
     //renderer.component_did_mount(&new_element.props);
 
-    //let x: std::sync::Arc<Component> = instance.into();
-
-    // new_element.instance = Some(instance);
-    //new_element.instance = Some(x);
     Ok(new_element)
 }
 
