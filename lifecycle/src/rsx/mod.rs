@@ -47,7 +47,7 @@ impl RSX {
     ) -> RSX {
         RSX::VirtualNode(VirtualNode {
             tag: tag,
-            create_component_fn: Arc::new(create_fn),
+            create_component_fn: create_fn,
             instance: None,
             layout_node: None,
             props: props,
