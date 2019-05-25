@@ -19,7 +19,7 @@ pub struct VirtualNode {
 
     /// `Component` instances are created on-demand, if the reconciler deems it be so. This
     /// is a closure that should return an instance of the correct type.
-    pub create_component_fn: Arc<Fn() -> Arc<RwLock<Component>> + Send + Sync + 'static>,
+    pub create_component_fn: Arc<fn() -> Arc<RwLock<Component>>>,
 
     /// A cached component instance, which is transferred between trees. Since `Component` 
     /// instances are lazily created, this is an `Option`, and defaults to `None`.

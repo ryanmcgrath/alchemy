@@ -40,7 +40,11 @@ pub enum RSX {
 impl RSX {
     /// Shorthand method for creating a new `RSX::VirtualNode` instance. Rarely should you call
     /// this yourself; the `rsx! {}` macro handles this for you.
-    pub fn node<F: Fn() -> Arc<RwLock<Component>> + Send + Sync + 'static>(tag: &'static str, create_fn: F, props: Props) -> RSX {
+    pub fn node(
+        tag: &'static str,
+        create_fn: fn() -> Arc<RwLock<Component>>,
+        props: Props
+    ) -> RSX {
         RSX::VirtualNode(VirtualNode {
             tag: tag,
             create_component_fn: Arc::new(create_fn),
