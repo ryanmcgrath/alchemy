@@ -7,7 +7,6 @@ use std::mem::{discriminant, swap};
 use alchemy_styles::Stretch;
 use alchemy_styles::styles::Style;
 
-use alchemy_lifecycle::traits::Component;
 use alchemy_lifecycle::rsx::{StylesList, RSX, VirtualNode};
 
 /// Given two node trees, will compare, diff, and apply changes in a recursive fashion. 
@@ -199,9 +198,11 @@ fn find_and_link_layout_nodes(parent_node: &mut VirtualNode, child_tree: &mut Vi
     if let (Some(parent_instance), Some(child_instance)) = (&mut parent_node.instance, &mut child_tree.instance) {
         if let (Some(parent_layout_node), Some(child_layout_node)) = (&parent_node.layout_node, &child_tree.layout_node) {
             stretch.add_child(*parent_layout_node, *child_layout_node)?;
-            if let (parent_component, child_component) = (parent_instance.write().unwrap(), child_instance.read().unwrap()) {
-                parent_component.append_child_component(&*child_component);
-            }
+            
+            let parent_component = parent_instance.write().unwrap();
+            let child_component = child_instance.read().unwrap();
+            parent_component.append_child_component(&*child_component);
+            
             return Ok(());
         }
     }

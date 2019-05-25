@@ -22,11 +22,35 @@ use alchemy_cocoa::text::{Text as PlatformTextBridge};
 /// ```
 /// <Text styles=["styleKey1", "styleKey2"] />
 /// ```
-pub struct Text(Mutex<PlatformTextBridge>);
+pub struct Text {
+    text: String,
+    bridge: Mutex<PlatformTextBridge>
+}
 
 impl Default for Text {
     fn default() -> Text {
-        Text(Mutex::new(PlatformTextBridge::new()))
+        Text {
+            text: "".into(),
+            bridge: Mutex::new(PlatformTextBridge::new())
+        }
+    }
+}
+
+impl Text {
+    // This is very naive for now, but it's fine - we probably
+    // want to do some fun stuff here later with stylized text
+    // rendering anyway.
+    fn compare_and_update_text(&mut self, props: &Props) {
+        let text = props.children.iter().map(|child| match child {
+            RSX::VirtualText(s) => s.0.clone(),
+            _ => String::new()
+        }).collect::<String>();
+        
+        if self.text != text {
+            let mut bridge = self.bridge.lock().unwrap();
+            bridge.set_text(&text);
+            self.text = text;
+        }
     }
 }
 
@@ -34,25 +58,24 @@ impl Component for Text {
     fn has_native_backing_node(&self) -> bool { true }
     
     fn borrow_native_backing_node(&self) -> Option<PlatformSpecificNodeType> {
-        let bridge = self.0.lock().unwrap();
+        let bridge = self.bridge.lock().unwrap();
         Some(bridge.borrow_native_backing_node())
     }
 
     // Shouldn't be allowed to have child <Text> elements... or, should it?
     // Panic might not be right here, but eh, should probably do something.
-    fn append_child_component(&self, component: &Component) {}
+    fn append_child_component(&self, _component: &Component) {}
 
     fn apply_styles(&self, layout: &Layout, style: &Style) {
-        let mut bridge = self.0.lock().unwrap();
+        let mut bridge = self.bridge.lock().unwrap();
         bridge.apply_styles(layout, style);
     }
 
     fn component_did_mount(&mut self, props: &Props) {
-        let mut bridge = self.0.lock().unwrap();
-        bridge.set_text("LOL");
+        self.compare_and_update_text(props);
     }
 
-    fn render(&self, props: &Props) -> Result<RSX, Error> {
+    fn render(&self, _props: &Props) -> Result<RSX, Error> {
         Ok(RSX::None)
     }
 }

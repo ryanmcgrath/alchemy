@@ -30,7 +30,7 @@ pub struct Text {
     inner_share: ShareId<Object>,
     background_color: Id<Object>,
     text_color: Id<Object>,
-    text: Id<Object>
+    //text: Id<Object>
 }
 
 impl Text {
@@ -38,7 +38,7 @@ impl Text {
     /// flipping occur (macOS still uses (0,0) as lower-left by default), and opting in to layer
     /// backed views for smoother scrolling.
     pub fn new() -> Text {
-        let (inner_mut, inner_share, s) = unsafe {
+        let (inner_mut, inner_share) = unsafe {
             let initial_string = NSString::alloc(nil).init_str("wut wut");
             let view: id = msg_send![register_class(), labelWithString:initial_string];
             msg_send![view, setSelectable:YES];
@@ -46,7 +46,7 @@ impl Text {
             msg_send![view, setWantsLayer:YES];
             msg_send![view, setLayerContentsRedrawPolicy:1];
             let x = view.clone();
-            (Id::from_ptr(view), ShareId::from_ptr(x), Id::from_ptr(initial_string))
+            (Id::from_ptr(view), ShareId::from_ptr(x)) //, Id::from_ptr(initial_string))
         };
 
         Text {
@@ -54,7 +54,7 @@ impl Text {
             inner_share: inner_share,
             background_color: Color::transparent().into_nscolor(),
             text_color: Color::transparent().into_nscolor(),
-            text: s
+       //     text: s
         }
     }
 
@@ -116,10 +116,6 @@ fn register_class() -> *const Class {
         
         // Force NSText to render from the top-left, not bottom-left
         //decl.add_method(sel!(isFlipped), enforce_normalcy as extern fn(&Object, _) -> BOOL);
-
-        // Opt-in to AutoLayout
-        decl.add_method(sel!(isSelectable), enforce_normalcy as extern fn(&Object, _) -> BOOL);
-        decl.add_method(sel!(drawsBackground), enforce_normalcy as extern fn(&Object, _) -> BOOL);
 
         // Request optimized backing layers
         //decl.add_method(sel!(updateLayer), update_layer as extern fn(&Object, _));

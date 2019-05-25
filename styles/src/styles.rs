@@ -337,7 +337,15 @@ pub struct Style {
 
     // Appearance-based styles
     pub background_color: Color,
-    pub text_color: Color
+    pub font_size: f32,
+    pub font_style: FontStyle,
+    pub font_weight: FontWeight,
+    pub opacity: f32,
+    pub text_alignment: TextAlignment,
+    pub text_color: Color,
+    pub text_decoration_color: Color,
+    pub text_shadow_color: Color,
+    pub tint_color: Color
 }
 
 impl Default for Style {
@@ -365,7 +373,18 @@ impl Default for Style {
             max_size: Default::default(),
             aspect_ratio: Default::default(),
             background_color: Color::transparent(),
-            text_color: Color::transparent()
+            
+            // @TODO: We can definitely judge a default value better here. 
+            font_size: 14.,
+            
+            font_style: FontStyle::default(),
+            font_weight: FontWeight::default(),
+            opacity: 1.,
+            text_alignment: TextAlignment::default(),
+            text_color: Color::transparent(),
+            text_decoration_color: Color::transparent(),
+            text_shadow_color: Color::transparent(),
+            tint_color: Color::transparent()
         }
     }
 }

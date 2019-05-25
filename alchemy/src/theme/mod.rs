@@ -73,7 +73,6 @@ impl ThemeEngine {
         let mut themes = self.themes.write().unwrap();
         if !themes.contains_key(key) {
             themes.insert(key.to_string(), stylesheet);
-            println!("REGISTERED STYLES");
             return;
         }
 

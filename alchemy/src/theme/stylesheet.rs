@@ -97,9 +97,9 @@ fn reduce_styles_into_style(styles: &Vec<Styles>, layout: &mut Style) {
         
         Styles::FontFamily(_val) => { },
         Styles::FontLineHeight(_val) => { },
-        Styles::FontSize(_val) => { },
-        Styles::FontStyle(_val) => { },
-        Styles::FontWeight(_val) => { },
+        Styles::FontSize(val) => { layout.font_size = *val; },
+        Styles::FontStyle(val) => { layout.font_style = *val; },
+        Styles::FontWeight(val) => { layout.font_weight = *val; },
         
         Styles::Height(val) => {
             layout.size = Size {
@@ -201,8 +201,8 @@ fn reduce_styles_into_style(styles: &Vec<Styles>, layout: &mut Style) {
             };
         },
 
-        Styles::Opacity(val) => { },
-        Styles::Overflow(val) => { },
+        Styles::Opacity(val) => { layout.opacity = *val; },
+        Styles::Overflow(val) => { layout.overflow = *val; },
 
         Styles::PaddingBottom(val) => {
             layout.padding = Rect {
@@ -278,11 +278,11 @@ fn reduce_styles_into_style(styles: &Vec<Styles>, layout: &mut Style) {
             };
         },
         
-        Styles::TextAlignment(val) => { },
+        Styles::TextAlignment(val) => { layout.text_alignment = *val; },
         Styles::TextColor(val) => { layout.text_color = *val; },
-        Styles::TextDecorationColor(val) => { },
-        Styles::TextShadowColor(val) => { },
-        Styles::TintColor(val) => { },
+        Styles::TextDecorationColor(val) => { layout.text_decoration_color = *val; },
+        Styles::TextShadowColor(val) => { layout.text_shadow_color = *val; },
+        Styles::TintColor(val) => { layout.tint_color = *val; },
         
         Styles::Top(val) => {
             layout.position = Rect {
