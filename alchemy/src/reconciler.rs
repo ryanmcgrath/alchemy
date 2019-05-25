@@ -218,6 +218,8 @@ fn find_and_link_layout_nodes(parent_node: &mut VirtualNode, child_tree: &mut Vi
 /// Recursively constructs a Component tree. This entails adding it to the backing
 /// view tree, firing various lifecycle methods, and ensuring that nodes for layout
 /// passes are configured.
+///
+/// In the future, this would ideally return patch-sets for the backing layer or something.
 fn mount_component_tree(mut new_element: VirtualNode, stretch: &mut Stretch) -> Result<VirtualNode, Box<Error>> {
     let instance = (new_element.create_component_fn)();
 
@@ -239,7 +241,9 @@ fn mount_component_tree(mut new_element: VirtualNode, stretch: &mut Stretch) -> 
         
         component.render(&new_element.props)
     };
-        
+    
+    // instance.get_snapshot_before_update()
+
     new_element.instance = Some(instance);
 
     let mut children = match rendered {
@@ -298,9 +302,6 @@ fn mount_component_tree(mut new_element: VirtualNode, stretch: &mut Stretch) -> 
         component.component_did_mount(&new_element.props);
     }
     
-    // instance.get_snapshot_before_update()
-    //renderer.component_did_mount(&new_element.props);
-
     Ok(new_element)
 }
 

@@ -6,9 +6,7 @@ Alchemy - A Rust GUI Framework
 [![Gitter](https://badges.gitter.im/alchemy-rs/alchemy.svg)](https://gitter.im/alchemy-rs/alchemy)
 [![Crates.io](https://img.shields.io/crates/v/alchemy.svg)](https://crates.io/crates/alchemy)
 
-API Documentation: [latest release](https://docs.rs/alchemy) – [trunk branch](https://docs.alchemy.rs)
-
-[Homepage](https://alchemy.rs)
+[Homepage](https://alchemy.rs) • [API Documentation](https://docs.rs/alchemy/)
 
 Alchemy is a Rust GUI Framework, backed by native widgets on each platform it supports, with an API that's a blend of those found in AppKit, UIKit, and React Native. It aims to provide an API that feels at home in Rust, while striving to provide a visual appearance that's easy to scan and parse. It does not, and will never, require nightly. It's still early stages, but feedback and contributions are welcome.
 
