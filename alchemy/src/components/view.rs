@@ -61,4 +61,3 @@ impl Component for View {
         }))
     }
 }
-

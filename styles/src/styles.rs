@@ -336,7 +336,8 @@ pub struct Style {
     pub aspect_ratio: Number,
 
     // Appearance-based styles
-    pub background_color: Color
+    pub background_color: Color,
+    pub text_color: Color
 }
 
 impl Default for Style {
@@ -363,7 +364,8 @@ impl Default for Style {
             min_size: Default::default(),
             max_size: Default::default(),
             aspect_ratio: Default::default(),
-            background_color: Color::transparent()
+            background_color: Color::transparent(),
+            text_color: Color::transparent()
         }
     }
 }

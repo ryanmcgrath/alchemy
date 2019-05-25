@@ -19,5 +19,6 @@
 
 pub mod color;
 pub mod app;
+pub mod text;
 pub mod view;
 pub mod window;

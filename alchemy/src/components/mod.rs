@@ -5,8 +5,8 @@
 
 pub mod fragment;
 pub mod view;
-//pub mod text;
+pub mod text;
 
 pub use fragment::Fragment;
 pub use view::View;
-//pub use text::*;
+pub use text::Text;

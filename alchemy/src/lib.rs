@@ -29,7 +29,7 @@ mod app;
 use app::App;
 
 pub mod components;
-pub use components::{Fragment, View};
+pub use components::{Fragment, Text, View};
 
 pub(crate) mod reconciler;
 pub mod theme;

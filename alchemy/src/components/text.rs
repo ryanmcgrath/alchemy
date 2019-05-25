@@ -1,34 +1,59 @@
-//! components/label.rs
-//!
-//! Implements a Label Component struct. Used for TextNode
-//! behind the scenes on most platforms.
-//!
-//! @author Ryan McGrath <ryan@rymc.io>
-//! @created 03/29/2019
+//! Handles hoisting per-platform specific Text components.
+//! Each platform needs the freedom to do some specific things,
+//! hence why they're all (somewhat annoyingly, but lovingly) re-implemented 
+//! as bridges.
 
-use crate::prelude::RSX;
-use crate::components::Component;
-use crate::dom::elements::FlowContent;
+use std::sync::{Mutex};
 
-#[derive(RSX, Debug, Default)]
-pub struct Text {}
+use alchemy_styles::styles::{Layout, Style};
 
-#[cfg(target_os = "macos")]
-impl Component for Text {
-    fn create_native_backing_node(&self) -> cocoa::base::id {
-        use objc::{msg_send, sel, sel_impl};
-        use cocoa::foundation::{NSRect, NSPoint, NSSize};
-        use cocoa::base::id;
-        use crate::components::macos::objc_classes::label;
+use alchemy_lifecycle::error::Error;
+use alchemy_lifecycle::rsx::{Props, RSX};
+use alchemy_lifecycle::traits::{Component, PlatformSpecificNodeType};
 
-        let view: cocoa::base::id;
+#[cfg(feature = "cocoa")]
+use alchemy_cocoa::text::{Text as PlatformTextBridge};
 
-        unsafe {
-            let rect_zero = NSRect::new(NSPoint::new(0., 0.), NSSize::new(0., 0.));
-            let alloc: id = msg_send![label::register_class(), alloc];
-            view = msg_send![alloc, initWithFrame:rect_zero];
-        }
+/// Text rendering is a complicated mess, and being able to defer to the
+/// backing platform for this is amazing. This is a very common Component.
+///
+/// Views accept styles and event callbacks as props. For example:
+///
+/// ```
+/// <Text styles=["styleKey1", "styleKey2"] />
+/// ```
+pub struct Text(Mutex<PlatformTextBridge>);
 
-        view
+impl Default for Text {
+    fn default() -> Text {
+        Text(Mutex::new(PlatformTextBridge::new()))
     }
 }
+
+impl Component for Text {
+    fn has_native_backing_node(&self) -> bool { true }
+    
+    fn borrow_native_backing_node(&self) -> Option<PlatformSpecificNodeType> {
+        let bridge = self.0.lock().unwrap();
+        Some(bridge.borrow_native_backing_node())
+    }
+
+    // Shouldn't be allowed to have child <Text> elements... or, should it?
+    // Panic might not be right here, but eh, should probably do something.
+    fn append_child_component(&self, component: &Component) {}
+
+    fn apply_styles(&self, layout: &Layout, style: &Style) {
+        let mut bridge = self.0.lock().unwrap();
+        bridge.apply_styles(layout, style);
+    }
+
+    fn component_did_mount(&mut self, props: &Props) {
+        let mut bridge = self.0.lock().unwrap();
+        bridge.set_text("LOL");
+    }
+
+    fn render(&self, props: &Props) -> Result<RSX, Error> {
+        Ok(RSX::None)
+    }
+}
+

@@ -279,7 +279,7 @@ fn reduce_styles_into_style(styles: &Vec<Styles>, layout: &mut Style) {
         },
         
         Styles::TextAlignment(val) => { },
-        Styles::TextColor(val) => { },
+        Styles::TextColor(val) => { layout.text_color = *val; },
         Styles::TextDecorationColor(val) => { },
         Styles::TextShadowColor(val) => { },
         Styles::TintColor(val) => { },

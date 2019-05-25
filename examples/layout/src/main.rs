@@ -9,7 +9,7 @@
 
 use alchemy::{
     AppDelegate, Component, Fragment, Props, Error, rsx, RSX, styles, 
-    View, Window, WindowDelegate
+    Text, View, Window, WindowDelegate
 };
 
 pub struct AppState {
@@ -48,6 +48,7 @@ impl WindowDelegate for WindowState {
         
         Ok(rsx! {
             <View styles={messages}>
+                <Text styles=["message"]>"Hello there, my name is Bert"</Text>
                 <View styles=["boxxx"] />
                 /*{messages.iter().map(|message| rsx! {
                     <View>{text!("{}", message)}</View>
@@ -67,6 +68,7 @@ fn main() {
     let app = alchemy::shared_app();
 
     app.register_styles("default", styles! {
+        message { width: 500; height: 100; background-color: yellow; color: black; }
         LOL {
             background-color: #307ace;
             width: 500;

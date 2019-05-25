@@ -47,7 +47,7 @@ impl Window {
 
             let title = NSString::alloc(nil).init_str(title);
             window.setTitle_(title);
-            msg_send![window, setTitlebarAppearsTransparent:YES];
+            //msg_send![window, setTitlebarAppearsTransparent:YES];
             msg_send![window, setTitleVisibility:1];
 
             // This is very important! NSWindow is an old class and has some behavior that we need
