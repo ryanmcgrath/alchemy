@@ -5,10 +5,10 @@
 
 use std::sync::{Arc, Mutex, RwLock};
 
-use alchemy_styles::styles::{Layout, Style};
+use alchemy_styles::{Layout, Style, StylesList};
 
 use alchemy_lifecycle::error::Error;
-use alchemy_lifecycle::rsx::{Props, RSX, StylesList};
+use alchemy_lifecycle::rsx::{Props, RSX};
 use alchemy_lifecycle::traits::{Component, PlatformSpecificNodeType};
 
 use crate::components::Fragment;

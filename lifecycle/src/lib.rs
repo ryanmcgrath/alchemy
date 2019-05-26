@@ -7,7 +7,19 @@
 //! It also includes the `RSX` enum, which is what `render()` methods generally
 //! return. It's common enough to multiple crates, and is intricately linked to the
 //! `Component` lifecycle, so it'll live here.
+//!
+//! This crate also includes the diffing and patching system for the widget tree - 
+//! it needs to live with the `Component` lifecycle to enable state updating.
+
+use alchemy_styles::lazy_static;
 
 pub mod error;
 pub mod rsx;
 pub mod traits;
+
+mod reconciler;
+use reconciler::RenderEngine;
+
+lazy_static! {
+    pub static ref RENDER_ENGINE: RenderEngine = RenderEngine::new();
+}

@@ -69,9 +69,9 @@ pub fn styles(input: TokenStream) -> TokenStream {
         body.extend(quote!(styles.insert(#key, vec![#stream]);))
     }
         
-    quote!(alchemy::theme::StyleSheet::new({
-        use alchemy::theme::styles::*;
-        use alchemy::theme::color::Color;
+    quote!(alchemy::StyleSheet::new({
+        use alchemy::style_attributes::*;
+        use alchemy::Color;
         let mut styles = std::collections::HashMap::new();
         #body
         styles

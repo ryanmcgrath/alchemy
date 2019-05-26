@@ -8,9 +8,9 @@
 
 use std::sync::{Arc, Mutex};
 
+use alchemy_styles::{StyleSheet, THEME_ENGINE};
 use alchemy_lifecycle::traits::AppDelegate;
 
-use crate::theme::{ThemeEngine, StyleSheet};
 use crate::window::WindowManager;
 
 #[cfg(feature = "cocoa")]
@@ -29,7 +29,6 @@ impl AppDelegate for DefaultAppDelegate {}
 pub struct App {
     pub(crate) bridge: Mutex<Option<PlatformAppBridge>>,
     pub delegate: Mutex<Box<AppDelegate>>,
-    pub themes: ThemeEngine,
     pub windows: WindowManager
 }
 
@@ -41,7 +40,6 @@ impl App {
         let app = Arc::new(App {
             bridge: Mutex::new(None),
             delegate: Mutex::new(Box::new(DefaultAppDelegate {})),
-            themes: ThemeEngine::new(),
             windows: WindowManager::new()
         });
 
@@ -61,7 +59,7 @@ impl App {
     /// conceivable that you might want to just have them in your app, too, and this enables
     /// that use case.
     pub fn register_styles(&self, theme_key: &str, stylesheet: StyleSheet) {
-        self.themes.register_styles(theme_key, stylesheet);
+        THEME_ENGINE.register_styles(theme_key, stylesheet);
     }
 
     /// Runs the app instance, by setting the necessary delegate and forwarding the run call

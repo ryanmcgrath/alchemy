@@ -15,17 +15,6 @@ pub use virtual_text::VirtualText;
 mod props;
 pub use props::Props;
 
-mod style_keys;
-pub use self::style_keys::StyleKey;
-
-mod spacedlist;
-pub use self::spacedlist::SpacedList;
-
-mod spacedset;
-pub use self::spacedset::SpacedSet;
-
-pub type StylesList = SpacedSet<StyleKey>;
-
 use crate::traits::Component;
 
 /// An enum representing the types of nodes that the

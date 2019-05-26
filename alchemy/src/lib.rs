@@ -15,8 +15,7 @@ pub use alchemy_lifecycle::traits::{
 
 pub use alchemy_lifecycle::error::Error;
 pub use alchemy_lifecycle::rsx::{
-    Props, RSX, StyleKey, StylesList,
-    SpacedSet, VirtualNode, VirtualText
+    Props, RSX, VirtualNode, VirtualText
 };
 
 #[proc_macro_hack(support_nested)]
@@ -25,6 +24,8 @@ pub use alchemy_macros::rsx;
 #[proc_macro_hack]
 pub use alchemy_macros::styles;
 
+pub use alchemy_styles::{Color, styles as style_attributes, SpacedSet, StyleSheet, StylesList};
+
 mod app;
 use app::App;
 
@@ -32,7 +33,6 @@ pub mod components;
 pub use components::{Fragment, Text, View};
 
 pub(crate) mod reconciler;
-pub mod theme;
 
 pub mod window;
 pub use window::Window;

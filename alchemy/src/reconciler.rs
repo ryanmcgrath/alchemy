@@ -7,7 +7,7 @@ use std::mem::{discriminant, swap};
 use alchemy_styles::Stretch;
 use alchemy_styles::styles::Style;
 
-use alchemy_lifecycle::rsx::{StylesList, RSX, VirtualNode};
+use alchemy_lifecycle::rsx::{RSX, VirtualNode};
 
 /// Given two node trees, will compare, diff, and apply changes in a recursive fashion. 
 pub fn diff_and_patch_tree(old: RSX, new: RSX, stretch: &mut Stretch, depth: usize) -> Result<RSX, Box<Error>> {
@@ -163,16 +163,6 @@ pub fn diff_and_patch_tree(old: RSX, new: RSX, stretch: &mut Stretch, depth: usi
     }
 }
 
-/// Given a set of style keys, and a mutable style to update, this will walk the keys
-/// and configure the Style node for the upcoming layout + render pass. Where appropriate,
-/// it will mark the node explicitly as dirty.
-///
-/// This may not need to be it's own function, we'll see down the road.
-fn configure_styles(style_keys: &StylesList, style: &mut Style) {
-    let app = crate::shared_app();
-    app.themes.configure_style_for_keys(style_keys, style);
-}
-
 /// Walks the tree and applies styles. This happens after a layout computation, typically.
 pub(crate) fn walk_and_apply_styles(node: &VirtualNode, layout_manager: &mut Stretch) -> Result<(), Box<Error>> {
     if let (Some(layout_node), Some(instance)) = (node.layout_node, &node.instance) {
@@ -234,7 +224,6 @@ fn mount_component_tree(mut new_element: VirtualNode, stretch: &mut Stretch) -> 
 
         if is_native_backed {
             let mut style = Style::default();
-            configure_styles(&new_element.props.styles, &mut style);
             
             let layout_node = stretch.new_node(style, vec![])?;
             new_element.layout_node = Some(layout_node);
