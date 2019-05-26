@@ -105,12 +105,22 @@ impl RenderEngine {
         let (old_root, mut stretch) = trees.remove(key).ok_or_else(|| RenderEngineError::InvalidKeyError {})?;
         let patched_new_root = diff_and_patch_trees(old_root, new_root, &mut stretch, 0)?;
 
+        /*let window_size = Size {
+	    width: Number::Defined(600.),
+	    height: Number::Defined(600.)
+	};*/
+
         if let RSX::VirtualNode(node) = &patched_new_root {
-            walk_and_apply_styles(node, &mut stretch)?;
+            if let Some(layout_node) = &node.layout_node {
+                stretch.compute_layout(*layout_node, Size {
+                    width: Number::Defined(600.),
+                    height: Number::Defined(600.),
+                })?;
+                walk_and_apply_styles(node, &mut stretch)?;
+            }
         }
 
         trees.insert(*key, (patched_new_root, stretch));
-        println!("RENDERED");
         Ok(())
     }
 }
