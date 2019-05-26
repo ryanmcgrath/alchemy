@@ -37,65 +37,18 @@ impl AppWindow {
     /// This method is called on the `show` event, and in rare cases can be useful to call
     /// directly.
     pub fn render(&mut self) {
-        /*
-        let mut new_root_node = create_root_node(None, &mut self.layout);
+        let children = match self.delegate.render() {
+            Ok(opt) => opt,
+            Err(e) => {
+                eprintln!("Error rendering window! {}", e);
+                RSX::None
+            }
+        };
 
-        // For API reasons, we'll call the render for this Window, and then patch it into a new
-        // root node for the tree diff/patch comparison. For this we only need to go one level
-        // deep, the recursion in the next step will handle the rest.
-        match self.delegate.render() {
-            Ok(opt) => match opt {
-                RSX::VirtualNode(mut child) => {
-                    if let RSX::VirtualNode(root) = &mut new_root_node {
-                        if child.tag == "Fragment" {
-                            root.children.append(&mut child.children);
-                        } else {
-                            root.children.push(RSX::VirtualNode(child));
-                        }
-                    }
-                },
-
-                // If it's an RSX::None, or a RSX::VirtualText, we do nothing, as... one
-                // requires nothing, and one isn't supported unless it's inside a <Text> tag.
-                _ => {}
-            },
-
+        match RENDER_ENGINE.diff_and_render_root(&self.render_key, children) {
+            Ok(_) => {}
             Err(e) => { eprintln!("Error rendering window! {}", e); }
         }
-
-        // Taking ownership of the tree makes parts of this so much easier, so let's swap
-        // them out for the moment. We're going to discard the old one anyway.
-        let mut old_root_node = RSX::None;
-        std::mem::swap(&mut old_root_node, &mut self.root_node);
-
-        self.root_node = match diff_and_patch_tree(old_root_node, new_root_node, &mut self.layout, 0) {
-            Ok(node) => node,
-            Err(e) => { eprintln!("Error: {}", e); RSX::None }
-        };
-
-        self.configure_and_apply_styles();
-        */
-    }
-
-    /// Walks the tree again, purely concerning itself with calculating layout and applying styles.
-    /// This in effect creates a two-pass layout system. In the future much of this may be made
-    /// async, so relying on underlying behavior in here is considered... suspect.
-    ///
-    /// This method is called on window resize and show events.
-    fn configure_and_apply_styles(&mut self) -> Result<(), Box<std::error::Error>> {
-        let window_size = Size {
-            width: Number::Defined(600.),
-            height: Number::Defined(600.)
-        };
-
-        /*if let RSX::VirtualNode(root_node) = &mut self.root_node {
-            if let Some(layout_node) = &root_node.layout_node {
-                self.layout.compute_layout(*layout_node, window_size)?;
-                walk_and_apply_styles(&root_node, &mut self.layout)?;
-            }
-        }*/
-
-        Ok(())
     }
 
     /// Renders and calls through to the native platform window show method.

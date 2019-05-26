@@ -16,6 +16,9 @@ use alchemy_styles::geometry::Size;
 use crate::traits::Component;
 use crate::rsx::{Props, RSX, VirtualNode};
 
+mod error;
+use error::RenderEngineError;
+
 // This is never actually created, it's just to satisfy the fact that View
 // is defined in the core crate, which we can't import here without creating a 
 // circular dependency.
@@ -77,12 +80,37 @@ impl RenderEngine {
     /// the new tree before discarding the old tree.
     ///
     /// This calls the necessary component lifecycles per-component.
-    pub fn diff_and_apply_root(&self, key: &Uuid, new_root: RSX) -> Result<(), Box<Error>> {
-        /*let trees = self.trees.lock().unwrap();
-        let (old_root, stretch) = trees.remove(key)?;
-        diff_and_patch_trees(old_root, new_root, &mut stretch, 0)?;
-        trees.insert(*key, (new_root, stretch));
-        */
+    pub fn diff_and_render_root(&self, key: &Uuid, child: RSX) -> Result<(), Box<Error>> {
+        let mut new_root = RSX::node("root", || {
+            Arc::new(RwLock::new(StubView {}))
+        }, {
+            let mut props = Props::default();
+            props.styles = "root".into();
+            props
+        });
+
+        // If it's an RSX::None, or a RSX::VirtualText, we do nothing, as... one
+        // requires nothing, and one isn't supported unless it's inside a <Text> tag. 
+        if let RSX::VirtualNode(mut child) = child {
+            if let RSX::VirtualNode(new_root_node) = &mut new_root {
+                if child.tag == "Fragment" {
+                    new_root_node.children.append(&mut child.children);
+                } else {
+                    new_root_node.children.push(RSX::VirtualNode(child));
+                }
+            }
+        }
+
+        let mut trees = self.trees.lock().unwrap();
+        let (old_root, mut stretch) = trees.remove(key).ok_or_else(|| RenderEngineError::InvalidKeyError {})?;
+        let patched_new_root = diff_and_patch_trees(old_root, new_root, &mut stretch, 0)?;
+
+        if let RSX::VirtualNode(node) = &patched_new_root {
+            walk_and_apply_styles(node, &mut stretch)?;
+        }
+
+        trees.insert(*key, (patched_new_root, stretch));
+        println!("RENDERED");
         Ok(())
     }
 }
