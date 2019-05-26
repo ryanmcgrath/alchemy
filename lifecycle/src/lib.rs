@@ -11,6 +11,8 @@
 //! This crate also includes the diffing and patching system for the widget tree - 
 //! it needs to live with the `Component` lifecycle to enable state updating.
 
+pub use uuid::Uuid;
+
 use alchemy_styles::lazy_static;
 
 pub mod error;

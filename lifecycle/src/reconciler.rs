@@ -1,7 +1,7 @@
 //! Implements tree diffing, and attempts to cache Component instances where
 //! possible.
 
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex, RwLock};
 use std::collections::HashMap;
 use std::error::Error;
 use std::mem::{discriminant, swap};
@@ -9,9 +9,18 @@ use std::mem::{discriminant, swap};
 use uuid::Uuid;
 
 use alchemy_styles::{Stretch, THEME_ENGINE};
-use alchemy_styles::styles::Style;
+use alchemy_styles::styles::{Style, Dimension};
+use alchemy_styles::number::Number;
+use alchemy_styles::geometry::Size;
 
-use crate::rsx::{RSX, VirtualNode};
+use crate::traits::Component;
+use crate::rsx::{Props, RSX, VirtualNode};
+
+// This is never actually created, it's just to satisfy the fact that View
+// is defined in the core crate, which we can't import here without creating a 
+// circular dependency.
+struct StubView;
+impl Component for StubView {}
 
 pub struct RenderEngine {
     pending_state_updates: Mutex<Vec<i32>>,
@@ -31,11 +40,33 @@ impl RenderEngine {
     /// they get a key back. When they want to instruct the global `RenderEngine` 
     /// to re-render or update their tree, they pass that key and whatever the new tree 
     /// should be.
-    pub fn register(&self, root: RSX) -> Uuid {
+    pub fn register_root_component<C: Component + 'static>(&self, instance: C) -> Uuid {
+        let mut root_node = RSX::node("root", || {
+            Arc::new(RwLock::new(StubView {}))
+        }, {
+            let mut props = Props::default();
+            props.styles = "root".into();
+            props
+        });
+    
+        let mut stretch = Stretch::new();
+        if let RSX::VirtualNode(root) = &mut root_node {
+            let mut style = Style::default();
+            style.size = Size {
+                width: Dimension::Points(600.),
+                height: Dimension::Points(600.)
+            };
+            
+            root.instance = Some(Arc::new(RwLock::new(instance)));
+            root.layout_node = match stretch.new_node(style, vec![]) {
+                Ok(node) => Some(node),
+                Err(e) => { None }
+            }
+        }
+        
         let key = Uuid::new_v4();
-        let stretch = Stretch::new();
         let mut trees = self.trees.lock().unwrap();
-        trees.insert(key, (root, stretch));
+        trees.insert(key, (root_node, stretch));
         key
     }
 

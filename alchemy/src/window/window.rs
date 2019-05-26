@@ -3,51 +3,19 @@
 
 use std::sync::{Arc, Mutex, RwLock};
 
-use alchemy_lifecycle::traits::{Component, WindowDelegate};
+use alchemy_lifecycle::{Uuid, RENDER_ENGINE};
 use alchemy_lifecycle::rsx::{Props, RSX};
+use alchemy_lifecycle::traits::{Component, WindowDelegate};
 
-use alchemy_styles::Stretch;
 use alchemy_styles::number::Number;
 use alchemy_styles::geometry::Size;
 use alchemy_styles::styles::{Style, Dimension};
 
 use crate::{App, SHARED_APP};
 use crate::components::View;
-use crate::reconciler::{diff_and_patch_tree, walk_and_apply_styles};
 
 #[cfg(feature = "cocoa")]
 use alchemy_cocoa::window::{Window as PlatformWindowBridge};
-
-/// Utility function for creating a root_node.
-fn create_root_node(instance: Option<Arc<RwLock<Component>>>, layout_manager: &mut Stretch) -> RSX {
-    let mut props = Props::default();
-    props.styles = "root".into();
-    
-    let mut root_node = RSX::node("root", || Arc::new(RwLock::new(View::default())), props);
-    
-    if let RSX::VirtualNode(root) = &mut root_node {
-        root.layout_node = match instance.is_some() {
-            true => {
-                let mut style = Style::default();
-                style.size = Size {
-                    width: Dimension::Points(600.),
-                    height: Dimension::Points(600.)
-                };
-                
-                match layout_manager.new_node(style, vec![]) {
-                    Ok(node) => Some(node),
-                    Err(e) => { None }
-                }
-            },
-
-            false => None
-        };
-        
-        root.instance = instance;
-    }
-    
-    root_node
-}
 
 /// AppWindow contains the inner details of a Window. It's guarded by a Mutex on `Window`,
 /// and you shouldn't create this yourself, but it's documented here so you can understand what
@@ -57,8 +25,7 @@ pub struct AppWindow {
     pub title: String,
     pub bridge: PlatformWindowBridge,
     pub delegate: Box<WindowDelegate>,
-    pub root_node: RSX,
-    pub layout: Stretch
+    pub render_key: Uuid
 }
 
 impl AppWindow {
@@ -70,6 +37,7 @@ impl AppWindow {
     /// This method is called on the `show` event, and in rare cases can be useful to call
     /// directly.
     pub fn render(&mut self) {
+        /*
         let mut new_root_node = create_root_node(None, &mut self.layout);
 
         // For API reasons, we'll call the render for this Window, and then patch it into a new
@@ -106,6 +74,7 @@ impl AppWindow {
         };
 
         self.configure_and_apply_styles();
+        */
     }
 
     /// Walks the tree again, purely concerning itself with calculating layout and applying styles.
@@ -119,12 +88,12 @@ impl AppWindow {
             height: Number::Defined(600.)
         };
 
-        if let RSX::VirtualNode(root_node) = &mut self.root_node {
+        /*if let RSX::VirtualNode(root_node) = &mut self.root_node {
             if let Some(layout_node) = &root_node.layout_node {
                 self.layout.compute_layout(*layout_node, window_size)?;
                 walk_and_apply_styles(&root_node, &mut self.layout)?;
             }
-        }
+        }*/
 
         Ok(())
     }
@@ -149,18 +118,17 @@ impl Window {
     /// Creates a new window.
     pub fn new<S: 'static + WindowDelegate>(title: &str, dimensions: (f64, f64, f64, f64), delegate: S) -> Window {
         let window_id = SHARED_APP.windows.allocate_new_window_id();
-        let mut layout = Stretch::new();
         let view = View::default();
         let shared_app_ptr: *const App = &**SHARED_APP;
         let bridge = PlatformWindowBridge::new(window_id, title, dimensions, &view, shared_app_ptr);
+        let key = RENDER_ENGINE.register_root_component(view);
         
         Window(Arc::new(Mutex::new(AppWindow {
             id: window_id,
             title: title.into(),
             bridge: bridge,
             delegate: Box::new(delegate),
-            root_node: create_root_node(Some(Arc::new(RwLock::new(view))), &mut layout),
-            layout: layout
+            render_key: key
         })))
     }
 

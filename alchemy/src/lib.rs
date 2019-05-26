@@ -32,8 +32,6 @@ use app::App;
 pub mod components;
 pub use components::{Fragment, Text, View};
 
-pub(crate) mod reconciler;
-
 pub mod window;
 pub use window::Window;
 
