@@ -17,8 +17,10 @@ use std::collections::HashMap;
 use toml;
 use serde::Deserialize;
 
+use crate::stretch::style::Style;
+
 use crate::StylesList;
-use crate::styles::Style;
+use crate::styles::Appearance;
 use crate::stylesheet::StyleSheet;
 
 static CONFIG_FILE_NAME: &str = "alchemy.toml";
@@ -85,13 +87,19 @@ impl ThemeEngine {
 
     /// Given a theme key, style keys, and a style, configures the style for layout
     /// and appearance.
-    pub fn configure_style_for_keys_in_theme(&self, theme: &str, keys: &StylesList, style: &mut Style) {
+    pub fn configure_style_for_keys_in_theme(
+        &self,
+        theme: &str,
+        keys: &StylesList,
+        style: &mut Style,
+        appearance: &mut Appearance
+    ) {
         let themes = self.themes.read().unwrap();
 
         match themes.get(theme) {
             Some(theme) => {
                 for key in &keys.0 {
-                    theme.apply_styles(key, style);
+                    theme.apply_styles(key, style, appearance);
                 }
             },
 
@@ -102,8 +110,8 @@ impl ThemeEngine {
     }
 
     /// The same logic as `configure_style_for_keys_in_theme`, but defaults to the default theme.
-    pub fn configure_style_for_keys(&self, keys: &StylesList, style: &mut Style) {
-        self.configure_style_for_keys_in_theme("default", keys, style)
+    pub fn configure_styles_for_keys(&self, keys: &StylesList, style: &mut Style, appearance: &mut Appearance) {
+        self.configure_style_for_keys_in_theme("default", keys, style, appearance)
     }
 }
 

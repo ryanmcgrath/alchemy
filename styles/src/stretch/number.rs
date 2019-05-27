@@ -1,3 +1,6 @@
+//! This module is included while awaiting an upstream merge in stretch proper.
+//! You should not rely on it, and consider it an implementation detail.
+
 use core::ops;
 
 #[derive(Copy, Clone, PartialEq, Debug)]

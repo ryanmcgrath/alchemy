@@ -11,7 +11,7 @@
 //! This crate also includes the diffing and patching system for the widget tree - 
 //! it needs to live with the `Component` lifecycle to enable state updating.
 
-pub use uuid::Uuid;
+pub use std::sync::Arc;
 
 use alchemy_styles::lazy_static;
 
@@ -21,6 +21,7 @@ pub mod traits;
 
 mod reconciler;
 use reconciler::RenderEngine;
+pub use reconciler::key::ComponentKey;
 
 lazy_static! {
     pub static ref RENDER_ENGINE: RenderEngine = RenderEngine::new();

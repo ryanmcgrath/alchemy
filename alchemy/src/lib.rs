@@ -9,6 +9,7 @@ use std::sync::Arc;
 pub use lazy_static::lazy_static;
 use proc_macro_hack::proc_macro_hack;
 
+pub use alchemy_lifecycle::ComponentKey;
 pub use alchemy_lifecycle::traits::{
     AppDelegate, Component, WindowDelegate
 };

@@ -1,14 +1,15 @@
+//! This module is included while awaiting an upstream merge in stretch proper.
+//! You should not rely on it, and consider it an implementation detail.
+
 use core::any::Any;
 use core::f32;
 
-use crate::node::{Node, Storage, Stretch};
-use crate::result;
-use crate::styles::*;
-
-use crate::number::Number::*;
-use crate::number::*;
-
-use crate::geometry::{Point, Rect, Size};
+use crate::stretch::node::{Node, Storage, Stretch};
+use crate::stretch::result;
+use crate::stretch::style::*;
+use crate::stretch::number::Number::*;
+use crate::stretch::number::*;
+use crate::stretch::geometry::{Point, Rect, Size};
 
 #[derive(Debug, Clone)]
 pub struct ComputeResult {

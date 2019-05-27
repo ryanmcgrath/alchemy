@@ -1,3 +1,6 @@
+//! This module is included while awaiting an upstream merge in stretch proper.
+//! You should not rely on it, and consider it an implementation detail.
+
 use core::any::Any;
 
 use std::collections::HashMap;
@@ -6,12 +9,12 @@ use std::sync::Mutex;
 
 use lazy_static::lazy_static;
 
-use crate::geometry::Size;
+use crate::stretch::geometry::Size;
 use crate::stretch::id;
-use crate::number::Number;
-use crate::result::{Cache, Layout};
-use crate::styles::*;
-use crate::Error;
+use crate::stretch::number::Number;
+use crate::stretch::result::{Cache, Layout};
+use crate::stretch::style::*;
+use crate::stretch::Error;
 
 type MeasureFunc = Box<Fn(Size<Number>) -> Result<Size<f32>, Box<Any>> + Send + Sync + 'static>;
 

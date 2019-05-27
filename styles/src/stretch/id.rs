@@ -1,6 +1,5 @@
-//! Identifier for a Node
-//!
-//!
+///! This module is included while awaiting an upstream merge in stretch proper.
+///! You should not rely on it, and consider it an implementation detail.
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub(crate) struct Id {

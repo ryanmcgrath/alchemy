@@ -1,17 +1,14 @@
 //! Implements the `RSX::VirtualNode` struct, which is a bit of a recursive
 //! structure.
 
-use std::sync::{Arc, RwLock};
 use std::fmt::{Display, Debug};
 
-use alchemy_styles::node::Node;
-
-use crate::traits::Component;
+use crate::reconciler::key::ComponentKey;
 use crate::rsx::{RSX, Props};
+use crate::traits::Component;
 
 /// A VirtualNode is akin to an `Element` in React terms. Here, we provide a way
-/// for lazy `Component` instantiation, along with storage for things like layout nodes,
-/// properties, children and so on.
+/// for lazy `Component` instantiation, properties, children and so on.
 #[derive(Clone)]
 pub struct VirtualNode {
     /// Used in debugging/printing/etc.
@@ -19,22 +16,17 @@ pub struct VirtualNode {
 
     /// `Component` instances are created on-demand, if the reconciler deems it be so. This
     /// is a closure that should return an instance of the correct type.
-    pub create_component_fn: fn() -> Arc<RwLock<Component>>,
+    pub create_component_fn: fn(key: ComponentKey) -> Box<Component>,
 
-    /// A cached component instance, which is transferred between trees. Since `Component` 
-    /// instances are lazily created, this is an `Option`, and defaults to `None`.
-    pub instance: Option<Arc<RwLock<Component>>>,
-
-    /// A cached `Node` for computing `Layout` with `Stretch`. Some components may not have
-    /// a need for layout (e.g, if they don't have a backing node), and thus this is optional.
+    /// `Props`, which are to be passed to this `Component` at various lifecycle methods. Once 
+    /// the reconciler takes ownership of this VirtualNode, these props are moved to a different 
+    /// location - thus, you shouldn't rely on them for anything unless you specifically keep 
+    /// ownership of a VirtualNode.
     ///
-    /// The reconciler will handle bridging tree structures as necessary.
-    pub layout_node: Option<Node>,
+    /// This aspect of functionality may be pulled in a later release if it causes too many issues.
+    pub props: Option<Props>,
 
-    /// `Props`, which are to be passed to this `Component` at various lifecycle methods.
-    pub props: Props,
-
-    /// Computed children get stored here.
+    /// 
     pub children: Vec<RSX>
 }
 

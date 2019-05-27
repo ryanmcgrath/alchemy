@@ -8,7 +8,7 @@
 /// @created March 26th, 2019
 
 use alchemy::{
-    AppDelegate, Component, Fragment, Props, Error, rsx, RSX, styles, 
+    AppDelegate, Component, ComponentKey, Fragment, Props, Error, rsx, RSX, styles, 
     Text, View, Window, WindowDelegate
 };
 
@@ -26,6 +26,10 @@ impl AppDelegate for AppState {
 pub struct Banner;
 
 impl Component for Banner {
+    fn constructor(_key: ComponentKey) -> Banner {
+        Banner {}
+    }
+
     fn render(&self, props: &Props) -> Result<RSX, Error> {
         Ok(rsx! {
             <Fragment>

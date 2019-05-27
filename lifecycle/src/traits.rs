@@ -1,11 +1,11 @@
 //! Traits that are used in Alchemy. Alchemy implements a React-based Component
 //! lifecycle, coupled with a delegate pattern inspired by those found in AppKit/UIKit.
 
-use std::sync::Arc;
+use alchemy_styles::styles::{Appearance, Layout};
 
-use alchemy_styles::styles::{Layout, Style};
-
+//use crate::RENDER_ENGINE;
 use crate::error::Error;
+use crate::reconciler::key::ComponentKey;
 use crate::rsx::{RSX, Props};
 
 /// A per-platform wrapped Pointer type, used for attaching views/widgets.
@@ -15,6 +15,11 @@ pub type PlatformSpecificNodeType = objc_id::ShareId<objc::runtime::Object>;
 /// A per-platform wrapped Pointer type, used for attaching views/widgets.
 #[cfg(not(feature = "cocoa"))]
 pub type PlatformSpecificNodeType = ();
+
+/*fn update<C: Component, F: Fn() -> Box<C> + Send + Sync + 'static>(component: &Component, updater: F) {
+    let component_ptr = component as *const C as usize;
+    RENDER_ENGINE.queue_update_for(component_ptr, Box::new(updater));
+}*/
 
 /// Each platform tends to have their own startup routine, their own runloop, and so on.
 /// Alchemy recognizes this and provides an `AppDelegate` that receives events at a system
@@ -75,6 +80,8 @@ pub trait State {}
 /// doesn't feel comfortable in Rust, in any way I tried). If you think you have an interesting
 /// proposal for this, feel free to open an issue!
 pub trait Component: Send + Sync {
+    fn constructor(key: ComponentKey) -> Self where Self: Sized;
+
     /// Indicates whether a Component instance carries a native backing node. If you return `true`
     /// from this, the reconciler will opt-in to the native backing layer. Returns `false` by
     /// default.
@@ -89,16 +96,15 @@ pub trait Component: Send + Sync {
 
     /// If you implement a Native-backed component, you'll need to implement this. Given a
     /// `component`, you need to instruct the system how to replace it in the tree at your point.
-    fn replace_child_component(&self, _component: Arc<Component>) {}
+    fn replace_child_component(&self, _component: &Component) {}
 
     /// If you implement a Native-backed component, you'll need to implement this. Given a
     /// `component`, you need to instruct the system how to remove it from the tree at your point.
-    fn remove_child_component(&self, _component: Arc<Component>) {}
+    fn remove_child_component(&self, _component: &Component) {}
 
-    /// Given a computed `layout`, and an accompanying `Style` (which holds appearance-based
-    /// styles, like colors), this method should transform them into appropriate calls to the
-    /// backing native node.
-    fn apply_styles(&self, _layout: &Layout, _style: &Style) {}
+    /// Given a configured 'appearance' and computed `layout`, this method should transform them 
+    /// into appropriate calls to the backing native node.
+    fn apply_styles(&self, _appearance: &Appearance, _layout: &Layout) {}
 
     /// Invoked right before calling the render method, both on the initial mount and on subsequent updates.
     /// It should return an object to update the state, or null to update nothing.

@@ -1,15 +1,11 @@
 //! Implements the Window API. It attempts to provide a nice, common interface across
 //! per-platform Window APIs.
 
-use std::sync::{Arc, Mutex, RwLock};
+use std::sync::{Arc, Mutex};
 
-use alchemy_lifecycle::{Uuid, RENDER_ENGINE};
-use alchemy_lifecycle::rsx::{Props, RSX};
-use alchemy_lifecycle::traits::{Component, WindowDelegate};
-
-use alchemy_styles::number::Number;
-use alchemy_styles::geometry::Size;
-use alchemy_styles::styles::{Style, Dimension};
+use alchemy_lifecycle::{ComponentKey, RENDER_ENGINE};
+use alchemy_lifecycle::rsx::RSX;
+use alchemy_lifecycle::traits::WindowDelegate;
 
 use crate::{App, SHARED_APP};
 use crate::components::View;
@@ -25,7 +21,7 @@ pub struct AppWindow {
     pub title: String,
     pub bridge: PlatformWindowBridge,
     pub delegate: Box<WindowDelegate>,
-    pub render_key: Uuid
+    pub render_key: ComponentKey
 }
 
 impl AppWindow {
@@ -74,7 +70,10 @@ impl Window {
         let view = View::default();
         let shared_app_ptr: *const App = &**SHARED_APP;
         let bridge = PlatformWindowBridge::new(window_id, title, dimensions, &view, shared_app_ptr);
-        let key = RENDER_ENGINE.register_root_component(view);
+        let key = match RENDER_ENGINE.register_root_component(view) {
+            Ok(key) => key,
+            Err(_e) => { panic!("Uhhhh this really messed up"); }
+        };
         
         Window(Arc::new(Mutex::new(AppWindow {
             id: window_id,

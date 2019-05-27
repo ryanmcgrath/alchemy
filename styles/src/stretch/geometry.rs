@@ -1,7 +1,10 @@
+//! This module is included while awaiting an upstream merge in stretch proper.
+//! You should not rely on it, and consider it an implementation detail.
+
 use core::ops::Add;
 
-use crate::number::Number;
-use crate::styles as style;
+use crate::stretch::number::Number;
+use crate::stretch::style;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Rect<T> {

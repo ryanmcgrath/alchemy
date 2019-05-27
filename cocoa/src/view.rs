@@ -13,9 +13,7 @@ use cocoa::foundation::{NSRect, NSPoint, NSSize};
 
 use crate::color::IntoNSColor;
 
-use alchemy_styles::color::Color;
-use alchemy_styles::styles::Style;
-use alchemy_styles::result::Layout;
+use alchemy_styles::{Appearance, Color, Layout};
 
 use alchemy_lifecycle::traits::PlatformSpecificNodeType;
 
@@ -70,14 +68,14 @@ impl View {
     /// Given a `&Style`, will set the frame, background color, borders and so forth. It then
     /// calls `setNeedsDisplay:YES` on the Objective-C side, so that Cocoa will re-render this
     /// view.
-    pub fn apply_styles(&mut self, layout: &Layout, style: &Style) {
+    pub fn apply_styles(&mut self, appearance: &Appearance, layout: &Layout) {
         unsafe {
             let rect = NSRect::new(
                 NSPoint::new(layout.location.x.into(), layout.location.y.into()),
                 NSSize::new(layout.size.width.into(), layout.size.height.into())
             );
 
-            self.background_color = style.background_color.into_nscolor();
+            self.background_color = appearance.background_color.into_nscolor();
             self.inner_mut.set_ivar(BACKGROUND_COLOR, &*self.background_color); 
             
             msg_send![&*self.inner_mut, setFrame:rect];

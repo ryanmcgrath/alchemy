@@ -7,7 +7,8 @@
 
 use std::collections::HashMap;
 
-use crate::styles::{Dimension, Rect, Size, Style, Styles};
+use crate::stretch::style::Style;
+use crate::styles::{Appearance, Dimension, Rect, Size, Styles};
 
 /// A `StyleSheet` contains selectors and parsed `Styles` attributes.
 /// It also has some logic to apply styles for n keys to a given `Style` node.
@@ -20,9 +21,9 @@ impl StyleSheet {
         StyleSheet(styles)
     }
 
-    pub fn apply_styles(&self, key: &str, style: &mut Style) {
+    pub fn apply_styles(&self, key: &str, style: &mut Style, appearance: &mut Appearance) {
         match self.0.get(key) {
-            Some(styles) => { reduce_styles_into_style(styles, style); },
+            Some(styles) => { reduce_styles_into_style(styles, style, appearance); },
             None => {}
         }
     }
@@ -30,14 +31,14 @@ impl StyleSheet {
 
 /// This takes a list of styles, and a mutable style object, and attempts to configure the
 /// style object in a way that makes sense given n styles.
-fn reduce_styles_into_style(styles: &Vec<Styles>, layout: &mut Style) {
+fn reduce_styles_into_style(styles: &Vec<Styles>, layout: &mut Style, appearance: &mut Appearance) {
     for style in styles { match style {
         Styles::AlignContent(val) => { layout.align_content = *val; },
         Styles::AlignItems(val) => { layout.align_items = *val; },
         Styles::AlignSelf(val) => { layout.align_self = *val; },
         Styles::AspectRatio(val) => { layout.aspect_ratio = *val; },
         Styles::BackfaceVisibility(_val) => { },
-        Styles::BackgroundColor(val) => { layout.background_color = *val; },
+        Styles::BackgroundColor(val) => { appearance.background_color = *val; },
 
         Styles::BorderColor(_val) => { },
         Styles::BorderEndColor(_val) => { },
@@ -102,9 +103,9 @@ fn reduce_styles_into_style(styles: &Vec<Styles>, layout: &mut Style) {
         
         Styles::FontFamily(_val) => { },
         Styles::FontLineHeight(_val) => { },
-        Styles::FontSize(val) => { layout.font_size = *val; },
-        Styles::FontStyle(val) => { layout.font_style = *val; },
-        Styles::FontWeight(val) => { layout.font_weight = *val; },
+        Styles::FontSize(val) => { appearance.font_size = *val; },
+        Styles::FontStyle(val) => { appearance.font_style = *val; },
+        Styles::FontWeight(val) => { appearance.font_weight = *val; },
         
         Styles::Height(val) => {
             layout.size = Size {
@@ -206,7 +207,7 @@ fn reduce_styles_into_style(styles: &Vec<Styles>, layout: &mut Style) {
             };
         },
 
-        Styles::Opacity(val) => { layout.opacity = *val; },
+        Styles::Opacity(val) => { appearance.opacity = *val; },
         Styles::Overflow(val) => { layout.overflow = *val; },
 
         Styles::PaddingBottom(val) => {
@@ -283,11 +284,11 @@ fn reduce_styles_into_style(styles: &Vec<Styles>, layout: &mut Style) {
             };
         },
         
-        Styles::TextAlignment(val) => { layout.text_alignment = *val; },
-        Styles::TextColor(val) => { layout.text_color = *val; },
-        Styles::TextDecorationColor(val) => { layout.text_decoration_color = *val; },
-        Styles::TextShadowColor(val) => { layout.text_shadow_color = *val; },
-        Styles::TintColor(val) => { layout.tint_color = *val; },
+        Styles::TextAlignment(val) => { appearance.text_alignment = *val; },
+        Styles::TextColor(val) => { appearance.text_color = *val; },
+        Styles::TextDecorationColor(val) => { appearance.text_decoration_color = *val; },
+        Styles::TextShadowColor(val) => { appearance.text_shadow_color = *val; },
+        Styles::TintColor(val) => { appearance.tint_color = *val; },
         
         Styles::Top(val) => {
             layout.position = Rect {

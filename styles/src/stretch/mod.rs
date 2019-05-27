@@ -1,12 +1,14 @@
+//! This module is included while awaiting an upstream merge in stretch proper.
+//! You should not rely on it, and consider it an implementation detail.
+
 pub mod geometry;
 pub mod node;
 pub mod number;
 pub mod result;
+pub mod style;
 
 mod algo;
 mod id;
-
-pub use crate::node::Stretch;
 
 use core::any::Any;
 

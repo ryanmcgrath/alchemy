@@ -1,6 +1,9 @@
+//! This module is included while awaiting an upstream merge in stretch proper.
+//! You should not rely on it, and consider it an implementation detail.
+
 use crate::stretch::algo::ComputeResult;
-use crate::geometry::{Point, Size};
-use crate::number::Number;
+use crate::stretch::geometry::{Point, Size};
+use crate::stretch::number::Number;
 
 #[derive(Copy, Debug, Clone)]
 pub struct Layout {

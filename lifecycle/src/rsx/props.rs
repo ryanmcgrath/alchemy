@@ -39,6 +39,15 @@ pub struct Props {
 }
 
 impl Props {
+    pub fn new(key: String, styles: StylesList, attributes: HashMap<&'static str, AttributeType>) -> Props {
+        Props {
+            attributes: attributes,
+            children: vec![],
+            key: key,
+            styles: styles
+        }
+    }
+
     /// Returns a Vec of RSX nodes, which are really just cloned pointers for the most part.
     pub fn children(&self) -> Vec<RSX> {
         self.children.clone()

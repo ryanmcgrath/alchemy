@@ -5,8 +5,9 @@
 
 use std::sync::{Mutex};
 
-use alchemy_styles::styles::{Layout, Style};
+use alchemy_styles::styles::{Appearance, Layout};
 
+use alchemy_lifecycle::ComponentKey;
 use alchemy_lifecycle::error::Error;
 use alchemy_lifecycle::rsx::{Props, RSX};
 use alchemy_lifecycle::traits::{Component, PlatformSpecificNodeType};
@@ -23,17 +24,9 @@ use alchemy_cocoa::text::{Text as PlatformTextBridge};
 /// <Text styles=["styleKey1", "styleKey2"] />
 /// ```
 pub struct Text {
+    key: ComponentKey,
     text: String,
     bridge: Mutex<PlatformTextBridge>
-}
-
-impl Default for Text {
-    fn default() -> Text {
-        Text {
-            text: "".into(),
-            bridge: Mutex::new(PlatformTextBridge::new())
-        }
-    }
 }
 
 impl Text {
@@ -55,6 +48,14 @@ impl Text {
 }
 
 impl Component for Text {
+    fn constructor(key: ComponentKey) -> Text {
+        Text {
+            key: key,
+            text: "".into(),
+            bridge: Mutex::new(PlatformTextBridge::new())
+        }
+    }
+
     fn has_native_backing_node(&self) -> bool { true }
     
     fn borrow_native_backing_node(&self) -> Option<PlatformSpecificNodeType> {
@@ -66,9 +67,9 @@ impl Component for Text {
     // Panic might not be right here, but eh, should probably do something.
     fn append_child_component(&self, _component: &Component) {}
 
-    fn apply_styles(&self, layout: &Layout, style: &Style) {
+    fn apply_styles(&self, appearance: &Appearance, layout: &Layout) {
         let mut bridge = self.bridge.lock().unwrap();
-        bridge.apply_styles(layout, style);
+        bridge.apply_styles(appearance, layout);
     }
 
     fn component_did_mount(&mut self, props: &Props) {

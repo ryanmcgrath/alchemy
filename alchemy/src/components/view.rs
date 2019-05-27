@@ -3,10 +3,11 @@
 //! hence why they're all (somewhat annoyingly, but lovingly) re-implemented 
 //! as bridges.
 
-use std::sync::{Arc, Mutex, RwLock};
+use std::sync::Mutex;
 
-use alchemy_styles::{Layout, Style, StylesList};
+use alchemy_styles::{Appearance, Layout, StylesList};
 
+use alchemy_lifecycle::ComponentKey;
 use alchemy_lifecycle::error::Error;
 use alchemy_lifecycle::rsx::{Props, RSX};
 use alchemy_lifecycle::traits::{Component, PlatformSpecificNodeType};
@@ -33,6 +34,10 @@ impl Default for View {
 }
 
 impl Component for View {
+    fn constructor(_key: ComponentKey) -> View {
+        View(Mutex::new(PlatformViewBridge::new()))
+    }
+
     fn has_native_backing_node(&self) -> bool { true }
     
     fn borrow_native_backing_node(&self) -> Option<PlatformSpecificNodeType> {
@@ -47,17 +52,17 @@ impl Component for View {
         }
     }
 
-    fn apply_styles(&self, layout: &Layout, style: &Style) {
+    fn apply_styles(&self, appearance: &Appearance, layout: &Layout) {
         let mut bridge = self.0.lock().unwrap();
-        bridge.apply_styles(layout, style);
+        bridge.apply_styles(appearance, layout);
     }
 
     fn render(&self, props: &Props) -> Result<RSX, Error> {
-        Ok(RSX::node("Fragment", || Arc::new(RwLock::new(Fragment::default())), Props {
+        Ok(RSX::node("Fragment", |key| Box::new(Fragment::constructor(key)), Props {
             attributes: std::collections::HashMap::new(),
             key: "".into(),
             styles: StylesList::new(),
-            children: props.children.clone()
-        }))
+            children: vec![]
+        }, props.children.clone()))
     }
 }

@@ -9,10 +9,6 @@ pub use lazy_static::lazy_static;
 #[cfg(feature="parser")]
 #[macro_use] pub extern crate cssparser;
 
-mod stretch;
-pub use stretch::{geometry, node, number, result, Stretch, Error};
-pub use stretch::result::Layout;
-
 pub mod color;
 pub use color::Color;
 
@@ -25,12 +21,15 @@ pub use spacedlist::SpacedList;
 mod spacedset;
 pub use spacedset::SpacedSet;
 
+pub mod stretch;
+pub use stretch::result::Layout;
+
 mod style_keys;
 pub use style_keys::StyleKey;
 pub type StylesList = SpacedSet<StyleKey>;
 
 pub mod styles;
-pub use styles::{Style, Styles};
+pub use styles::{Appearance, Styles};
 
 pub mod stylesheet;
 pub use stylesheet::StyleSheet;

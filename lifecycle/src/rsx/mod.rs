@@ -3,7 +3,6 @@
 //! uses these to build and alter UI; they're typically returned from `render()`
 //! methods.
 
-use std::sync::{Arc, RwLock};
 use std::fmt::{Debug, Display};
 
 mod virtual_node;
@@ -15,6 +14,7 @@ pub use virtual_text::VirtualText;
 mod props;
 pub use props::Props;
 
+use crate::reconciler::key::ComponentKey;
 use crate::traits::Component;
 
 /// An enum representing the types of nodes that the
@@ -31,16 +31,15 @@ impl RSX {
     /// this yourself; the `rsx! {}` macro handles this for you.
     pub fn node(
         tag: &'static str,
-        create_fn: fn() -> Arc<RwLock<Component>>,
-        props: Props
+        create_fn: fn(key: ComponentKey) -> Box<Component>,
+        props: Props,
+        children: Vec<RSX>
     ) -> RSX {
         RSX::VirtualNode(VirtualNode {
             tag: tag,
             create_component_fn: create_fn,
-            instance: None,
-            layout_node: None,
-            props: props,
-            children: vec![]
+            props: Some(props),
+            children: children
         })
     }
     

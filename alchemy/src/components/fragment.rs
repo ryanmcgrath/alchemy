@@ -4,6 +4,7 @@
 //! but as the language stabilizes even further I'd love to get rid of this and 
 //! just allow returning arbitrary iterators.
 
+use alchemy_lifecycle::ComponentKey;
 use alchemy_lifecycle::traits::Component;
 
 /// Fragments are special - you can do something like the following in cases where you
@@ -19,4 +20,8 @@ use alchemy_lifecycle::traits::Component;
 #[derive(Default, Debug)]
 pub struct Fragment;
 
-impl Component for Fragment {}
+impl Component for Fragment {
+    fn constructor(_key: ComponentKey) -> Fragment {
+        Fragment { }
+    }
+}
