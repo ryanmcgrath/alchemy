@@ -7,7 +7,7 @@ use std::sync::Mutex;
 use std::error::Error;
 
 use alchemy_styles::THEME_ENGINE;
-use alchemy_styles::styles::{Appearance, Number, Size, Style};
+use alchemy_styles::styles::{Appearance, Dimension, Number, Size, Style};
 
 use crate::traits::Component;
 use crate::rsx::{Props, RSX, VirtualNode};
@@ -92,15 +92,12 @@ impl RenderEngine {
         let mut component_store = self.components.lock().unwrap();
         let mut layout_store = self.layouts.lock().unwrap();
 
-        println!("Child: {:?}", child);
-        let new_root_node = RSX::node("root", |_| Box::new(GenericRootView {}), {
-            let mut props = Props::default();
-            props.styles = "root".into();
-            props
-        }, match child {
+        let new_root_node = RSX::node("root", |_| {
+            Box::new(GenericRootView {})
+        }, Props::root(match child {
             RSX::VirtualNode(node) => {
                 if node.tag == "Fragment" {
-                    node.children
+                    node.props.children
                 } else {
                     println!("Def here...");
                     vec![RSX::VirtualNode(node)]
@@ -108,13 +105,20 @@ impl RenderEngine {
             },
 
             _ => vec![]
-        });
+        }));
 
         recursively_diff_tree(key, new_root_node, &mut component_store, &mut layout_store)?;
 
         let layout_node = {
-            let root_instance = component_store.get(key)?;
-            root_instance.layout.unwrap()
+            let mut root_instance = component_store.get_mut(key)?;
+            let layout = root_instance.layout.unwrap();
+            let mut style = Style::default();
+            style.size = Size {
+                width: Dimension::Points(600.),
+                height: Dimension::Points(600.)
+            };
+            layout_store.set_style(layout, style);
+            layout
         };
 
         layout_store.compute_layout(layout_node, Size {
@@ -172,7 +176,7 @@ fn recursively_diff_tree(
     old_children.reverse();
 
     if let RSX::VirtualNode(mut child) = new_tree {
-        for new_child_tree in child.children {
+        for new_child_tree in child.props.children {
             match old_children.pop() {
                 // If there's a key in the old children for this position, it's 
                 // something we need to update, so let's recurse right back into it.
@@ -196,7 +200,8 @@ fn recursively_diff_tree(
                             layout_store
                         )?;
 
-                        link_nodes(key, new_child_key, component_store, layout_store)?;
+                        component_store.add_child(key, new_child_key)?;
+                        link_layout_nodess(key, new_child_key, component_store, layout_store)?;
                     }
                 }
             }
@@ -225,7 +230,6 @@ fn mount_component_tree(
     component_store: &mut ComponentStore,
     layout_store: &mut LayoutStore
 ) -> Result<ComponentKey, Box<Error>> {
-    println!("    Mounting Component");
     let key = component_store.new_key();
     let component = (tree.create_component_fn)(key);
     let is_native_backed = component.has_native_backing_node();
@@ -250,22 +254,24 @@ fn mount_component_tree(
             // tag similar to what React does, which just hoists the children out of it and
             // discards the rest.
             if child.tag == "Fragment" {
-                println!("        In Fragment {}", child.children.len());
-                for child_tree in child.children {
+                println!("        In Fragment {}", child.props.children.len());
+                for child_tree in child.props.children {
                     println!("          > WHAT");
                     if let RSX::VirtualNode(child_tree) = child_tree {
                         let child_key = mount_component_tree(child_tree, component_store, layout_store)?;
-
+                        
+                        component_store.add_child(key, child_key)?;
                         if is_native_backed {
-                            link_nodes(key, child_key, component_store, layout_store)?;
+                            link_layout_nodess(key, child_key, component_store, layout_store)?;
                         }
                     }
                 }
             } else {
                 println!("        In regular");
                 let child_key = mount_component_tree(child, component_store, layout_store)?;
+                component_store.add_child(key, child_key)?;
                 if is_native_backed {
-                    link_nodes(key, child_key, component_store, layout_store)?;
+                    link_layout_nodess(key, child_key, component_store, layout_store)?;
                 }
             }
         } else { println!("WTF"); },
@@ -327,7 +333,7 @@ fn unmount_component_tree(
 /// find a pattern that didn't feel like some utter magic in Rust.
 ///
 /// It might be because I'm writing this at 3AM. Feel free to improve it.
-fn link_nodes(
+fn link_layout_nodess(
     parent: ComponentKey,
     child: ComponentKey,
     components: &mut ComponentStore,
@@ -337,14 +343,13 @@ fn link_nodes(
         if let (Some(parent_layout), Some(child_layout)) = (parent_instance.layout, child_instance.layout) {
             layouts.add_child(parent_layout, child_layout)?;
             parent_instance.component.append_child_component(&*child_instance.component);
-            println!("APPENDED NODE!");
             return Ok(());
         }
     }
 
     let children = components.children(child)?;
     for child_key in children {
-        link_nodes(parent, child_key, components, layouts)?;
+        link_layout_nodess(parent, child_key, components, layouts)?;
     }
 
     Ok(())
@@ -358,7 +363,7 @@ fn walk_and_apply_styles(
     layouts: &mut LayoutStore
 ) -> Result<(), Box<Error>> {
     let instance = components.get_mut(key)?;
-    
+
     if let Some(layout_key) = instance.layout {
         instance.component.apply_styles(
             &instance.appearance,
@@ -367,6 +372,7 @@ fn walk_and_apply_styles(
     }
 
     for child in components.children(key)? {
+        println!("Nesting");
         walk_and_apply_styles(child, components, layouts)?;
     }
 

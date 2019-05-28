@@ -58,11 +58,12 @@ impl Component for View {
     }
 
     fn render(&self, props: &Props) -> Result<RSX, Error> {
+        println!("WTF: {}", props.children.len());
         Ok(RSX::node("Fragment", |key| Box::new(Fragment::constructor(key)), Props {
             attributes: std::collections::HashMap::new(),
             key: "".into(),
             styles: StylesList::new(),
-            children: vec![]
-        }, props.children.clone()))
+            children: props.children.clone()
+        }))
     }
 }

@@ -32,14 +32,12 @@ impl RSX {
     pub fn node(
         tag: &'static str,
         create_fn: fn(key: ComponentKey) -> Box<Component>,
-        props: Props,
-        children: Vec<RSX>
+        props: Props
     ) -> RSX {
         RSX::VirtualNode(VirtualNode {
             tag: tag,
             create_component_fn: create_fn,
-            props: props,
-            children: children
+            props: props
         })
     }
     

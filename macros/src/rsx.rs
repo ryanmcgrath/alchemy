@@ -226,11 +226,11 @@ impl Element {
                 let mut attributes = std::collections::HashMap::new();
                 #attributes
                 attributes
-            }), {
+            }, {
                 let mut children = vec![];
                 #children
                 children
-            })
+            }))
         ))
     }
 }

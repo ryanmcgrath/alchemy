@@ -24,10 +24,7 @@ pub struct VirtualNode {
     /// ownership of a VirtualNode.
     ///
     /// This aspect of functionality may be pulled in a later release if it causes too many issues.
-    pub props: Props,
-
-    /// 
-    pub children: Vec<RSX>
+    pub props: Props
 }
 
 impl Display for VirtualNode {
@@ -35,7 +32,7 @@ impl Display for VirtualNode {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         write!(f, "<{}>", self.tag)?;
 
-        for child in &self.children {
+        for child in &self.props.children {
             write!(f, "{:?}", child)?;
         }
 

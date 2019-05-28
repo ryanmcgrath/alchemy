@@ -37,12 +37,28 @@ pub struct Props {
 }
 
 impl Props {
-    pub fn new(key: String, styles: StylesList, attributes: HashMap<&'static str, AttributeType>) -> Props {
+    /// A helper method for constructing Properties.
+    pub fn new(
+        key: String,
+        styles: StylesList,
+        attributes: HashMap<&'static str, AttributeType>,
+        children: Vec<RSX>
+    ) -> Props {
         Props {
             attributes: attributes,
-            children: vec![],
+            children: children,
             key: key,
             styles: styles
+        }
+    }
+
+    /// A helper method used for constructing root-level Properties.
+    pub(crate) fn root(children: Vec<RSX>) -> Props {
+        Props {
+            attributes: HashMap::new(),
+            children: children,
+            key: "".into(),
+            styles: "root".into()
         }
     }
 
