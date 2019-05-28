@@ -41,8 +41,8 @@ impl AppWindow {
             }
         };
 
-        match RENDER_ENGINE.diff_and_render_root(&self.render_key, children) {
-            Ok(_) => {}
+        match RENDER_ENGINE.diff_and_render_root(self.render_key, children) {
+            Ok(_) => { println!("RENDERED!!!!"); }
             Err(e) => { eprintln!("Error rendering window! {}", e); }
         }
     }

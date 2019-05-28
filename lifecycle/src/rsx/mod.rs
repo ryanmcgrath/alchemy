@@ -38,7 +38,7 @@ impl RSX {
         RSX::VirtualNode(VirtualNode {
             tag: tag,
             create_component_fn: create_fn,
-            props: Some(props),
+            props: props,
             children: children
         })
     }

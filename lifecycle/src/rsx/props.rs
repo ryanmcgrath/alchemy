@@ -1,14 +1,12 @@
 //! Implements a Props struct that mostly acts as expected. For arbitrary primitive values,
 //! it shadows a `serde_json::Value`.
 
-use std::sync::{Arc, RwLock};
 use serde_json::Value;
 use std::collections::HashMap;
 
 use alchemy_styles::StylesList;
 
 use crate::rsx::RSX;
-use crate::traits::{Component};
 
 /// A value stored inside the `attributes` field on a `Props` instance.
 /// It shadows `serde_json::Value`, but also allows for some other value

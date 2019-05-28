@@ -24,7 +24,6 @@ use alchemy_cocoa::text::{Text as PlatformTextBridge};
 /// <Text styles=["styleKey1", "styleKey2"] />
 /// ```
 pub struct Text {
-    key: ComponentKey,
     text: String,
     bridge: Mutex<PlatformTextBridge>
 }
@@ -48,9 +47,8 @@ impl Text {
 }
 
 impl Component for Text {
-    fn constructor(key: ComponentKey) -> Text {
+    fn constructor(_: ComponentKey) -> Text {
         Text {
-            key: key,
             text: "".into(),
             bridge: Mutex::new(PlatformTextBridge::new())
         }

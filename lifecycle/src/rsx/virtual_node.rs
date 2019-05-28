@@ -24,7 +24,7 @@ pub struct VirtualNode {
     /// ownership of a VirtualNode.
     ///
     /// This aspect of functionality may be pulled in a later release if it causes too many issues.
-    pub props: Option<Props>,
+    pub props: Props,
 
     /// 
     pub children: Vec<RSX>

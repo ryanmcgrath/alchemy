@@ -4,7 +4,7 @@
 
 use std::sync::{Once, ONCE_INIT};
 
-use cocoa::base::{id, nil, YES, NO};
+use cocoa::base::{id, nil, /*YES,*/ NO};
 use cocoa::appkit::{NSWindow, NSWindowStyleMask, NSBackingStoreType};
 use cocoa::foundation::{NSRect, NSPoint, NSSize, NSString, NSAutoreleasePool};
 

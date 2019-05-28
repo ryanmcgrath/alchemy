@@ -2,8 +2,6 @@
 //! run. These are mostly internal to the rendering engine itself, but could potentially 
 //! show up elsewhere.
 
-use core::any::Any;
-
 use crate::reconciler::key::ComponentKey;
 
 #[derive(Debug)]

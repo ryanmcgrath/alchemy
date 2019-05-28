@@ -5,11 +5,10 @@
 use std::collections::HashMap;
 
 pub use alchemy_styles::Appearance;
-use alchemy_styles::stretch::node::{Node as LayoutNode};
 
 use crate::reconciler::error::{RenderEngineError as Error};
+use crate::reconciler::instance::Instance;
 use crate::reconciler::key::{Allocator, Id, INSTANCE_ALLOCATOR, ComponentKey};
-use crate::traits::Component;
 
 /// This is a clone of a structure you'll also find over in stretch. We do this separately 
 /// here for two reasons.
@@ -40,6 +39,13 @@ impl<T> Storage<T> {
         }
     }
 
+    pub fn remove(&mut self, key: ComponentKey) -> Result<T, Error> {
+        match self.0.remove(&key) {
+            Some(v) => Ok(v),
+            None => Err(Error::InvalidComponentKey(key))
+        }
+    }
+
     pub fn insert(&mut self, key: ComponentKey, value: T) -> Option<T> {
         self.0.insert(key, value)
     }
@@ -51,12 +57,6 @@ impl<T> std::ops::Index<&ComponentKey> for Storage<T> {
     fn index(&self, idx: &ComponentKey) -> &T {
         &(self.0)[idx]
     }
-}
-
-pub struct Instance {
-    component: Box<Component>,
-    appearance: Appearance,
-    layout: Option<LayoutNode>
 }
 
 pub(crate) struct ComponentStore {
@@ -78,28 +78,31 @@ impl ComponentStore {
         }
     }
 
-    fn allocate_node(&mut self) -> ComponentKey {
+    pub fn new_key(&mut self) -> ComponentKey {
         let local = self.nodes.allocate();
         ComponentKey { instance: self.id, local }
     }
 
-    pub fn new_node<C: Component + 'static>(&mut self, component: C, layout_key: Option<LayoutNode>, children: Vec<ComponentKey>) -> Result<ComponentKey, Error> {
-        let key = self.allocate_node();
-
-        for child in &children {
+    pub fn insert(
+        &mut self,
+        key: ComponentKey,
+        instance: Instance
+    ) -> Result<(), Error> {
+        /*for child in &children {
             self.parents.get_mut(*child)?.push(key);
-        }
+        }*/
 
-        self.components.insert(key, Instance {
-            component: Box::new(component),
-            appearance: Appearance::default(),
-            layout: layout_key
-        });
-
+        self.components.insert(key, instance);
         self.parents.insert(key, Vec::with_capacity(1));
-        self.children.insert(key, children);
+        self.children.insert(key, vec![]); //children);
 
-        Ok(key)
+        Ok(())
+    }
+
+    pub fn remove(&mut self, key: ComponentKey) -> Result<Instance, Error> {
+        self.parents.remove(key)?;
+        self.children.remove(key)?;
+        self.components.remove(key)
     }
 
     pub fn add_child(&mut self, key: ComponentKey, child: ComponentKey) -> Result<(), Error> {
