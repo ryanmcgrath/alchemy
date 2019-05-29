@@ -99,7 +99,6 @@ impl RenderEngine {
                 if node.tag == "Fragment" {
                     node.props.children
                 } else {
-                    println!("Def here...");
                     vec![RSX::VirtualNode(node)]
                 }
             },
@@ -113,6 +112,7 @@ impl RenderEngine {
             let mut root_instance = component_store.get_mut(key)?;
             let layout = root_instance.layout.unwrap();
             let mut style = Style::default();
+            THEME_ENGINE.configure_styles_for_keys(&root_instance.props.styles, &mut style, &mut root_instance.appearance);
             style.size = Size {
                 width: Dimension::Points(600.),
                 height: Dimension::Points(600.)
@@ -126,7 +126,6 @@ impl RenderEngine {
             height: Number::Defined(600.)
         })?;
         
-        println!("Applying layout...");
         walk_and_apply_styles(key, &mut component_store, &mut layout_store)?;
 
         Ok(())
@@ -161,7 +160,6 @@ fn recursively_diff_tree(
     };
 
     if is_replace {
-        println!("here, what?!");
         unmount_component_tree(key, component_store, layout_store)?;
         //mount_component_tree(
         return Ok(());
@@ -244,7 +242,6 @@ fn mount_component_tree(
     
     let rendered = instance.component.render(&instance.props);
     // instance.get_snapshot_before_update()
-    println!("Rendered... {}", instance.tag);
     component_store.insert(key, instance)?;
 
     match rendered {
@@ -254,9 +251,7 @@ fn mount_component_tree(
             // tag similar to what React does, which just hoists the children out of it and
             // discards the rest.
             if child.tag == "Fragment" {
-                println!("        In Fragment {}", child.props.children.len());
                 for child_tree in child.props.children {
-                    println!("          > WHAT");
                     if let RSX::VirtualNode(child_tree) = child_tree {
                         let child_key = mount_component_tree(child_tree, component_store, layout_store)?;
                         
@@ -267,14 +262,14 @@ fn mount_component_tree(
                     }
                 }
             } else {
-                println!("        In regular");
                 let child_key = mount_component_tree(child, component_store, layout_store)?;
+                
                 component_store.add_child(key, child_key)?;
                 if is_native_backed {
                     link_layout_nodess(key, child_key, component_store, layout_store)?;
                 }
             }
-        } else { println!("WTF"); },
+        },
 
         Err(e) => {
             // return an RSX::VirtualNode(ErrorComponentView) or something?
@@ -372,7 +367,6 @@ fn walk_and_apply_styles(
     }
 
     for child in components.children(key)? {
-        println!("Nesting");
         walk_and_apply_styles(child, components, layouts)?;
     }
 

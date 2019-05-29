@@ -18,6 +18,8 @@ pub struct AppState {
 
 impl AppDelegate for AppState {
     fn did_finish_launching(&mut self) {
+        self.window.set_title("Layout Test");
+        self.window.set_dimensions(100., 100., 600., 600.);
         self.window.show();
     }
 }
@@ -72,14 +74,18 @@ fn main() {
     let app = alchemy::shared_app();
 
     app.register_styles("default", styles! {
-        message { width: 500; height: 100; background-color: yellow; color: black; }
+        root { background-color: #000; }
+
         LOL {
             background-color: #307ace;
             width: 500;
             height: 230;
             padding-top: 20;
             padding-left: 20;
+            padding-right: 40;
         }
+        
+        message { width: 500; height: 100; background-color: yellow; color: black; }
 
         boxxx {
             background-color: rgba(245, 217, 28, .8);
@@ -109,6 +115,8 @@ fn main() {
     });
     
     app.run(AppState {
-        window: Window::new("Testing...", (0., 0., 600., 600.), WindowState {})
+        window: Window::new(WindowState {
+        
+        })
     });
 }

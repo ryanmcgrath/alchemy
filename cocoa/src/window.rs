@@ -4,7 +4,7 @@
 
 use std::sync::{Once, ONCE_INIT};
 
-use cocoa::base::{id, nil, /*YES,*/ NO};
+use cocoa::base::{id, nil, YES, NO};
 use cocoa::appkit::{NSWindow, NSWindowStyleMask, NSBackingStoreType};
 use cocoa::foundation::{NSRect, NSPoint, NSSize, NSString, NSAutoreleasePool};
 
@@ -14,6 +14,7 @@ use objc::runtime::{Class, Object, Sel};
 use objc::{msg_send, sel, sel_impl};
 
 use alchemy_lifecycle::traits::{AppDelegate, Component};
+use alchemy_styles::Appearance;
 
 static APP_PTR: &str = "alchemyAppPtr";
 static WINDOW_MANAGER_ID: &str = "alchemyWindowManagerID";
@@ -29,13 +30,12 @@ impl Window {
     /// Creates a new `NSWindow` instance, configures it appropriately (e.g, titlebar appearance),
     /// injects an `NSObject` delegate wrapper, and retains the necessary Objective-C runtime
     /// pointers.
-    pub fn new<T: AppDelegate>(window_id: usize, title: &str, dimensions: (f64, f64, f64, f64), content_view: &Component, app_ptr: *const T) -> Window {
-        let (top, left, width, height) = dimensions;
-        let dimensions = NSRect::new(NSPoint::new(top, left), NSSize::new(width, height));
+    pub fn new<T: AppDelegate>(window_id: usize, content_view: &Component, app_ptr: *const T) -> Window {
+        let dimensions = NSRect::new(NSPoint::new(0., 0.), NSSize::new(0., 0.));
 
         let style = NSWindowStyleMask::NSResizableWindowMask |
             NSWindowStyleMask::NSUnifiedTitleAndToolbarWindowMask | NSWindowStyleMask::NSMiniaturizableWindowMask |
-            NSWindowStyleMask::NSClosableWindowMask | NSWindowStyleMask::NSTitledWindowMask;
+            NSWindowStyleMask::NSClosableWindowMask | NSWindowStyleMask::NSTitledWindowMask | NSWindowStyleMask::NSFullSizeContentViewWindowMask;
 
         let inner = unsafe {
             let window = NSWindow::alloc(nil).initWithContentRect_styleMask_backing_defer_(
@@ -45,10 +45,8 @@ impl Window {
                 NO
             ).autorelease();
 
-            let title = NSString::alloc(nil).init_str(title);
-            window.setTitle_(title);
-            //msg_send![window, setTitlebarAppearsTransparent:YES];
-            msg_send![window, setTitleVisibility:1];
+            msg_send![window, setTitlebarAppearsTransparent:YES];
+            //msg_send![window, setTitleVisibility:1];
 
             // This is very important! NSWindow is an old class and has some behavior that we need
             // to disable, like... this. If we don't set this, we'll segfault entirely because the
@@ -76,6 +74,29 @@ impl Window {
             delegate: delegate
         }
     }
+
+    pub fn set_title(&mut self, title: &str) {
+        unsafe {
+            let title = NSString::alloc(nil).init_str(title);
+            msg_send![&*self.inner, setTitle:title];
+        }
+    }
+
+    pub fn set_dimensions(&mut self, x: f64, y: f64, width: f64, height: f64) {
+        unsafe {
+            let dimensions = NSRect::new(
+                NSPoint::new(x.into(), y.into()),
+                NSSize::new(width.into(), height.into())
+            );
+
+            msg_send![&*self.inner, setFrame:dimensions display:YES];
+        }
+    }
+
+    /// Normally used for setting platform-specific styles; on macOS we choose not to do this and
+    /// just have the content view handle the background color, as calling window
+    /// setBackgroundColor causes some notable lag on resizing.
+    pub fn apply_styles(&mut self, _appearance: &Appearance) { }
 
     /// On macOS, calling `show()` is equivalent to calling `makeKeyAndOrderFront`. This is the
     /// most common use case, hence why this method was chosen - if you want or need something

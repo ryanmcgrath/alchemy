@@ -7,6 +7,8 @@ use alchemy_lifecycle::{ComponentKey, RENDER_ENGINE};
 use alchemy_lifecycle::rsx::RSX;
 use alchemy_lifecycle::traits::WindowDelegate;
 
+use alchemy_styles::{Appearance, Style, StylesList, THEME_ENGINE};
+
 use crate::{App, SHARED_APP};
 use crate::components::View;
 
@@ -18,7 +20,9 @@ use alchemy_cocoa::window::{Window as PlatformWindowBridge};
 /// it holds.
 pub struct AppWindow {
     pub id: usize,
+    pub style_keys: StylesList,
     pub title: String,
+    pub dimensions: (f64, f64, f64, f64),
     pub bridge: PlatformWindowBridge,
     pub delegate: Box<WindowDelegate>,
     pub render_key: ComponentKey
@@ -33,6 +37,12 @@ impl AppWindow {
     /// This method is called on the `show` event, and in rare cases can be useful to call
     /// directly.
     pub fn render(&mut self) {
+        let mut style = Style::default();
+        let mut appearance = Appearance::default();
+        THEME_ENGINE.configure_styles_for_keys(&self.style_keys, &mut style, &mut appearance);
+
+        self.bridge.apply_styles(&appearance);
+
         let children = match self.delegate.render() {
             Ok(opt) => opt,
             Err(e) => {
@@ -42,9 +52,19 @@ impl AppWindow {
         };
 
         match RENDER_ENGINE.diff_and_render_root(self.render_key, children) {
-            Ok(_) => { println!("RENDERED!!!!"); }
+            Ok(_) => { }
             Err(e) => { eprintln!("Error rendering window! {}", e); }
         }
+    }
+
+    pub fn set_title(&mut self, title: &str) {
+        self.title = title.into();
+        self.bridge.set_title(title);
+    }
+
+    pub fn set_dimensions(&mut self, x: f64, y: f64, width: f64, height: f64) {
+        self.dimensions = (x, y, width, height);
+        self.bridge.set_dimensions(x, y, width, height);
     }
 
     /// Renders and calls through to the native platform window show method.
@@ -65,11 +85,11 @@ pub struct Window(pub(crate) Arc<Mutex<AppWindow>>);
 
 impl Window {
     /// Creates a new window.
-    pub fn new<S: 'static + WindowDelegate>(title: &str, dimensions: (f64, f64, f64, f64), delegate: S) -> Window {
+    pub fn new<S: 'static + WindowDelegate>(delegate: S) -> Window {
         let window_id = SHARED_APP.windows.allocate_new_window_id();
         let view = View::default();
         let shared_app_ptr: *const App = &**SHARED_APP;
-        let bridge = PlatformWindowBridge::new(window_id, title, dimensions, &view, shared_app_ptr);
+        let bridge = PlatformWindowBridge::new(window_id, &view, shared_app_ptr);
         let key = match RENDER_ENGINE.register_root_component(view) {
             Ok(key) => key,
             Err(_e) => { panic!("Uhhhh this really messed up"); }
@@ -77,7 +97,9 @@ impl Window {
         
         Window(Arc::new(Mutex::new(AppWindow {
             id: window_id,
-            title: title.into(),
+            style_keys: "".into(),
+            title: "".into(),
+            dimensions: (0., 0., 0., 0.),
             bridge: bridge,
             delegate: Box::new(delegate),
             render_key: key
@@ -90,6 +112,16 @@ impl Window {
     pub fn render(&self) {
         let mut window = self.0.lock().unwrap();
         window.render();
+    }
+
+    pub fn set_title(&self, title: &str) {
+        let mut window = self.0.lock().unwrap();
+        window.set_title(title);
+    }
+
+    pub fn set_dimensions(&mut self, x: f64, y: f64, width: f64, height: f64) {
+        let mut window = self.0.lock().unwrap();
+        window.set_dimensions(x, y, width, height);
     }
 
     /// Registers this window with the window manager, renders it, and shows it.

@@ -20,6 +20,8 @@ struct AppState {
 
 impl AppDelegate for AppState {
     fn did_finish_launching(&mut self) {
+        self.window.set_title("LOL");
+        self.window.set_dimensions(10., 10., 600., 600.);
         self.window.show();
     }
 }
@@ -55,9 +57,10 @@ fn main() {
         }
     });
 
-    let dimensions = (0., 0., 600., 600.);
     app.run(AppState {
-        window: Window::new("Le Appy App", dimensions, WindowState {})
+        window: Window::new(WindowState {
+        
+        })
     });
 }
 ```

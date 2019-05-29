@@ -29,7 +29,7 @@ pub use style_keys::StyleKey;
 pub type StylesList = SpacedSet<StyleKey>;
 
 pub mod styles;
-pub use styles::{Appearance, Styles};
+pub use styles::{Appearance, Styles, Style};
 
 pub mod stylesheet;
 pub use stylesheet::StyleSheet;
