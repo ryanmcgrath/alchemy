@@ -88,7 +88,12 @@ impl RenderEngine {
     /// `Window`). Thus, for this one, we do some manual mucking with what we know is the
     /// root view (a `Window` or such root component would call this with it's registered
     /// `ComponentKey`), and then recurse based on the children.
-    pub fn diff_and_render_root(&self, key: ComponentKey, child: RSX) -> Result<(), Box<Error>> {
+    pub fn diff_and_render_root(
+        &self,
+        key: ComponentKey,
+        dimensions: (f64, f64),
+        child: RSX
+    ) -> Result<(), Box<Error>> {
         let mut component_store = self.components.lock().unwrap();
         let mut layout_store = self.layouts.lock().unwrap();
 
@@ -114,16 +119,16 @@ impl RenderEngine {
             let mut style = Style::default();
             THEME_ENGINE.configure_styles_for_keys(&root_instance.props.styles, &mut style, &mut root_instance.appearance);
             style.size = Size {
-                width: Dimension::Points(600.),
-                height: Dimension::Points(600.)
+                width: Dimension::Points(dimensions.0 as f32),
+                height: Dimension::Points(dimensions.1 as f32)
             };
             layout_store.set_style(layout, style);
             layout
         };
 
         layout_store.compute_layout(layout_node, Size {
-            width: Number::Defined(600.),
-            height: Number::Defined(600.)
+            width: Number::Defined(dimensions.0 as f32),
+            height: Number::Defined(dimensions.1 as f32)
         })?;
         
         walk_and_apply_styles(key, &mut component_store, &mut layout_store)?;
