@@ -95,7 +95,13 @@ A custom component would look like the following:
 ``` rust
 use alchemy::{Component, ComponentKey, Error, Props, rsx, RSX};
 
-pub struct MySpecialWidget;
+#[derive(Default)]
+pub struct MySpecialWidgetProps;
+
+#[derive(Props)]
+pub struct MySpecialWidget {
+    props: MySpecialWidgetProps
+}
 
 impl Component for MySpecialWidget {
     fn new(key: ComponentKey) -> MySpecialWidget {
