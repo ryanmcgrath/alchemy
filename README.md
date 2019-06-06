@@ -8,7 +8,7 @@ Alchemy - A Rust GUI Framework
 
 [Homepage](https://alchemy.rs) • [API Documentation](https://docs.rs/alchemy/)
 
-Alchemy is a Rust GUI Framework, backed by native widgets on each platform it supports, with an API that's a blend of those found in AppKit, UIKit, and React Native. It aims to provide an API that feels at home in Rust, while striving to provide a visual appearance that's easy to scan and parse. It does not, and will never, require nightly. It's still early stages, but feedback and contributions are welcome.
+Alchemy is an _experimental_ Rust GUI Framework, backed by native widgets on each platform it supports, with an API that's a blend of those found in AppKit, UIKit, and React Native. It aims to provide an API that feels at home in Rust, while striving to provide a visual appearance that's easy to scan and parse. It does not, and will never, require nightly. It's still early stages, but feedback and contributions are welcome.
 
 ## Supported Platforms
 Alchemy will, ideally, support the platforms listed below. At the moment, the `Cocoa` backend is the most complete, as I develop on a Mac and know the framework more than I'd care to admit. This list will be updated as more frameworks are added.
@@ -16,8 +16,7 @@ Alchemy will, ideally, support the platforms listed below. At the moment, the `C
 - `cocoa`, which provides backing widgets, windows and assorted frameworks for `macOS`.
 - `cocoa-touch`, which provides backing widgets, windows and assorted frameworks for `iOS`.
 - `gtk`, which affords a `GTK` layer. This is mostly intended for GNOME users; if you'd like to run it elsewhere, you're on your own.
-- `qt`, which affords a `Qt` layer. This is mostly indended for `KDE` users; if you'd like to run it elsewhere, you're on your own.
-- `uwp`, which affords a `"UWP"` layer for Microsoft platforms that support it. This is a bit of a hack, provided by linking into the [microsoft/WinObjC](https://github.com/Microsoft/WinObjC/) framework, originally intended for porting `iOS` applications to `UWP`. Down the road, if or when a proper `UWP` library for Rust surfaces, I'd be happy to look at replacing this.
+- `uwp`, which affords a `"UWP"` layer for Microsoft platforms that support it. This will be a bit of a hack, provided by linking into the [microsoft/WinObjC](https://github.com/Microsoft/WinObjC/) framework, originally intended for porting `iOS` applications to `UWP`. Down the road, if or when a proper `UWP` library for Rust surfaces, I'd be happy to look at replacing this.
 
 Support for more platforms is desired - for example, I think an [`OrbTk`](https://gitlab.redox-os.org/redox-os/orbtk) or [`Piston`](https://www.piston.rs) backend could be cool to see. A `web` backend would be awesome to support. A [`winapi-rs`](https://github.com/retep998/winapi-rs) backend could be cool, too!
 
@@ -30,6 +29,8 @@ At the moment, the following is implemented:
 - An RSX system, based on work done in [bodil/typed-html](https://github.com/bodil/typed-html) by Bodil Stokke. This was actually the project that made me circle back to the entire thing, too.
 - Macros for easy UI construction - `rsx! {}`, which transforms JSX-ish syntax into element trees for the reconciler to work with, and `styles! {}`, which pre-process CSS into their styles.
 - A CSS layout system, based off the work done over in [vislyhq/stretch](https://github.com/vislyhq/stretch). At the moment, this project includes a fork with a newer underlying API by [msiglreith](https://github.com/msiglreith/stretch/tree/index). Once the API is merged upstream, it's likely the dependency would change to `stretch` proper.
+
+You can clone this repo and `cargo run` from the root to see the example app.
 
 ## What's it look like?
 ``` rust
@@ -92,18 +93,20 @@ Yes. Alchemy implements the React component lifecycle - although it does not (cu
 A custom component would look like the following:
 
 ``` rust
-use alchemy::{Component, Error, Props, rsx, RSX};
+use alchemy::{Component, ComponentKey, Error, Props, rsx, RSX};
 
-pub struct MySpecialWidget {
-    your_special_value_or_whatever: i32
-}
+pub struct MySpecialWidget;
 
 impl Component for MySpecialWidget {
-    fn component_did_mount(&mut self, props: &Props) {
+    fn new(key: ComponentKey) -> MySpecialWidget {
+        MySpecialWidget {}
+    }
+    
+    fn component_did_mount(&mut self) {
         // Do whatever you want. Fire a network request or something, I dunno.
     }
 
-    fn render(&self, props: &Props) -> Result<RSX, Error> {
+    fn render(&self, children: Vec<RSX>) -> Result<RSX, Error> {
         Ok(RSX::None)
     }
 }
