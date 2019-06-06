@@ -13,7 +13,6 @@ keywords = ["gui", "css", "styles", "layout", "react"]
 maintenance = { status = "actively-developed" }
 
 [features]
-default = ["alchemy-cocoa", "alchemy-lifecycle/cocoa"]
 cocoa = ["alchemy-cocoa", "alchemy-lifecycle/cocoa"]
 
 [dependencies]
