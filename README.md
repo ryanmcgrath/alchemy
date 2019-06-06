@@ -3,7 +3,6 @@
 Alchemy - A Rust GUI Framework
 ==========================================================
 
-[![Gitter](https://badges.gitter.im/alchemy-rs/alchemy.svg)](https://gitter.im/alchemy-rs/alchemy)
 [![Crates.io](https://img.shields.io/crates/v/alchemy.svg)](https://crates.io/crates/alchemy)
 
 [Homepage](https://alchemy.rs) • [API Documentation](https://docs.rs/alchemy/)
