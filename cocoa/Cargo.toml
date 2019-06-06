@@ -21,3 +21,7 @@ dispatch = "0.1.4"
 cocoa = "0.18.4"
 core-foundation = "0.6"
 core-graphics = "0.17.1"
+
+[package.metadata.docs.rs]
+features = ["cocoa"]
+default-target = "x86_64-apple-darwin"

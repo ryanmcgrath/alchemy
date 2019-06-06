@@ -33,3 +33,7 @@ serde_json = "1"
 strum = "0.15.0"
 strum_macros = "0.15.0"
 toml = "0.5"
+
+[package.metadata.docs.rs]
+features = ["cocoa"]
+default-target = "x86_64-apple-darwin"
