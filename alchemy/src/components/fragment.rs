@@ -23,7 +23,7 @@ pub struct FragmentProps;
 pub struct Fragment;
 
 impl Fragment {
-    fn default_props() -> FragmentProps {
+    pub fn default_props() -> FragmentProps {
         FragmentProps {}
     }
 }

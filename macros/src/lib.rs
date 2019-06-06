@@ -90,13 +90,13 @@ pub fn writable_props_derive(input: TokenStream) -> TokenStream {
 
     TokenStream::from(quote! {
         impl #impl_generics #name #ty_generics #where_clause {
-            fn default_props() -> #name_props {
+            pub fn default_props() -> #name_props {
                 #name_props::default()
             }
         }
 
         impl #impl_generics alchemy::ComponentProps for #name #ty_generics #where_clause {
-            fn set_props(&mut self, new_props: &mut Any) {
+            fn set_props(&mut self, new_props: &mut std::any::Any) {
                 match new_props.downcast_ref::<#name_props>() {
                     Some(props) => { },
                     None => { panic!("Woah there, somehow the wrong props were being passed!"); }

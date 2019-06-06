@@ -26,3 +26,13 @@ pub use reconciler::key::ComponentKey;
 lazy_static! {
     pub static ref RENDER_ENGINE: RenderEngine = RenderEngine::new();
 }
+
+#[macro_export]
+macro_rules! text {
+    ($t:expr) => {
+        alchemy::RSX::text($t)
+    };
+    ($format:tt, $($tail:expr),*) => {
+        alchemy::RSX::text(format!($format, $($tail),*))
+    };
+}

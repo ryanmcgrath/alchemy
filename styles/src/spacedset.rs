@@ -121,6 +121,21 @@ where
     }
 }
 
+impl<'a, A: Ord + FromStr> From<&Vec<&'a str>> for SpacedSet<A>
+where
+    <A as FromStr>::Err: Debug,
+{
+    fn from(s: &Vec<&'a str>) -> Self {
+        let mut list = Self::new();
+
+        for key in s {
+            list.insert(FromStr::from_str(key).unwrap());
+        }
+        
+        list
+    }
+}
+
 impl<'a, 'b, A: Ord + FromStr> From<(&'a str, &'b str)> for SpacedSet<A>
 where
     <A as FromStr>::Err: Debug,

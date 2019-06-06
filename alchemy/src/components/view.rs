@@ -5,7 +5,7 @@
 
 use std::sync::Mutex;
 
-use alchemy_styles::{Appearance, Layout, StylesList};
+use alchemy_styles::{Appearance, Layout};
 
 use alchemy_lifecycle::ComponentKey;
 use alchemy_lifecycle::error::Error;

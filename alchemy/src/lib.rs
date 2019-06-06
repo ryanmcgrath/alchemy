@@ -9,9 +9,9 @@ use std::sync::Arc;
 pub use lazy_static::lazy_static;
 use proc_macro_hack::proc_macro_hack;
 
-pub use alchemy_lifecycle::ComponentKey;
+pub use alchemy_lifecycle::{ComponentKey, text};
 pub use alchemy_lifecycle::traits::{
-    AppDelegate, Component, Props, WindowDelegate
+    AppDelegate, Component, Props as ComponentProps, WindowDelegate
 };
 
 pub use alchemy_lifecycle::error::Error;
@@ -24,6 +24,7 @@ pub use alchemy_macros::rsx;
 
 #[proc_macro_hack]
 pub use alchemy_macros::styles;
+pub use alchemy_macros::Props;
 
 pub use alchemy_styles::{Color, styles as style_attributes, SpacedSet, StyleSheet, StylesList};
 

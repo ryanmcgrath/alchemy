@@ -8,7 +8,7 @@
 /// @created March 26th, 2019
 
 use alchemy::{
-    AppDelegate, Component, ComponentKey, Fragment, Props, Error, rsx, RSX, styles, 
+    AppDelegate, Component, ComponentKey, Fragment, Error, Props, rsx, RSX, styles, text,  
     Text, View, Window, WindowDelegate
 };
 
@@ -24,26 +24,26 @@ impl AppDelegate for AppState {
     }
 }
 
-/*#[derive(Default)]
-pub struct Banner;
+#[derive(Default)]
+struct BannerProps {}
+
+#[derive(Props)]
+struct Banner;
 
 impl Component for Banner {
-    type Props = Box<()>;
-    type State = Box<()>;
-
-    fn constructor(_key: ComponentKey) -> Banner {
+    fn new(_key: ComponentKey) -> Banner {
         Banner {}
     }
 
-    fn render(&self, props: &Self::Props) -> Result<RSX, Error> {
+    fn render(&self, children: Vec<RSX>) -> Result<RSX, Error> {
         Ok(rsx! {
             <Fragment>
                 <View styles=["wut1"]></View>
-                //{props.children.clone()}
+                {children}
             </Fragment>
         })
     }
-}*/
+}
 
 pub struct WindowState;
 
@@ -55,17 +55,16 @@ impl WindowDelegate for WindowState {
     fn render(&self) -> Result<RSX, Error> {
         let messages = vec!["LOL"]; //, "wut", "BERT"];
         Ok(rsx! {
-            <View styles={messages}>
+            <View styles={&messages}>
                 <Text styles=["message"]>"Hello there, my name is Bert"</Text>
                 <View styles=["boxxx"] />
-                /*{messages.iter().map(|message| rsx! {
-                    <View>{text!("{}", message)}</View>
-                })}*/
+                {messages.iter().map(|message| rsx! {
+                    <Text styles=["text"]>{text!("{}", message)}</Text>
+                })}
                 <View styles=["box1"]>
-                    //<View styles=["box1"]></View>
-                    //<Banner>
-                        //<View styles=["innermostBox"] />
-                    //</Banner>
+                    <Banner>
+                        <View styles=["innermostBox"] />
+                    </Banner>
                 </View>
             </View>
         })
@@ -88,6 +87,7 @@ fn main() {
         }
         
         message { width: 500; height: 100; background-color: yellow; color: black; }
+        text { width: 500; height: 100; background-color: blue; color: white; }
 
         boxxx {
             background-color: rgba(245, 217, 28, .8);
