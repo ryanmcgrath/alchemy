@@ -3,7 +3,10 @@
 //! uses these to build and alter UI; they're typically returned from `render()`
 //! methods.
 
+use std::any::Any;
 use std::fmt::{Debug, Display};
+
+use alchemy_styles::StylesList;
 
 mod virtual_node;
 pub use virtual_node::VirtualNode;
@@ -11,15 +14,11 @@ pub use virtual_node::VirtualNode;
 mod virtual_text;
 pub use virtual_text::VirtualText;
 
-mod props;
-pub use props::Props;
-
 use crate::reconciler::key::ComponentKey;
 use crate::traits::Component;
 
 /// An enum representing the types of nodes that the
 /// system can work with. `None`, `VirtualText`, or `VirtualNode`.
-#[derive(Clone)]
 pub enum RSX {
     None,
     VirtualText(VirtualText),
@@ -29,15 +28,19 @@ pub enum RSX {
 impl RSX {
     /// Shorthand method for creating a new `RSX::VirtualNode` instance. Rarely should you call
     /// this yourself; the `rsx! {}` macro handles this for you.
-    pub fn node(
+    pub fn node<P: Any + 'static>(
         tag: &'static str,
+        styles: StylesList,
         create_fn: fn(key: ComponentKey) -> Box<Component>,
-        props: Props
+        props: P,
+        children: Vec<RSX>
     ) -> RSX {
         RSX::VirtualNode(VirtualNode {
             tag: tag,
             create_component_fn: create_fn,
-            props: props
+            styles: styles,
+            props: Box::new(props),
+            children: children
         })
     }
     

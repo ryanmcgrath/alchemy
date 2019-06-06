@@ -24,23 +24,26 @@ impl AppDelegate for AppState {
     }
 }
 
-#[derive(Default)]
+/*#[derive(Default)]
 pub struct Banner;
 
 impl Component for Banner {
+    type Props = Box<()>;
+    type State = Box<()>;
+
     fn constructor(_key: ComponentKey) -> Banner {
         Banner {}
     }
 
-    fn render(&self, props: &Props) -> Result<RSX, Error> {
+    fn render(&self, props: &Self::Props) -> Result<RSX, Error> {
         Ok(rsx! {
             <Fragment>
                 <View styles=["wut1"]></View>
-                {props.children.clone()}
+                //{props.children.clone()}
             </Fragment>
         })
     }
-}
+}*/
 
 pub struct WindowState;
 
@@ -51,7 +54,6 @@ impl WindowDelegate for WindowState {
 
     fn render(&self) -> Result<RSX, Error> {
         let messages = vec!["LOL"]; //, "wut", "BERT"];
-        
         Ok(rsx! {
             <View styles={messages}>
                 <Text styles=["message"]>"Hello there, my name is Bert"</Text>
@@ -61,9 +63,9 @@ impl WindowDelegate for WindowState {
                 })}*/
                 <View styles=["box1"]>
                     //<View styles=["box1"]></View>
-                    <Banner>
-                        <View styles=["innermostBox"] />
-                    </Banner>
+                    //<Banner>
+                        //<View styles=["innermostBox"] />
+                    //</Banner>
                 </View>
             </View>
         })

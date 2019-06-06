@@ -5,7 +5,7 @@ use std::sync::{Arc, Mutex};
 
 use alchemy_lifecycle::{ComponentKey, RENDER_ENGINE};
 use alchemy_lifecycle::rsx::RSX;
-use alchemy_lifecycle::traits::WindowDelegate;
+use alchemy_lifecycle::traits::{Component, WindowDelegate};
 
 use alchemy_styles::{Appearance, Style, StylesList, THEME_ENGINE};
 
@@ -92,7 +92,11 @@ impl Window {
         let window_id = SHARED_APP.windows.allocate_new_window_id();
         let view = View::default();
         let shared_app_ptr: *const App = &**SHARED_APP;
-        let bridge = PlatformWindowBridge::new(window_id, &view, shared_app_ptr);
+        
+        // This unwrap() is fine, since we implement View ourselves in Alchemy
+        let backing_node = view.borrow_native_backing_node().unwrap();
+        let bridge = PlatformWindowBridge::new(window_id, backing_node, shared_app_ptr);
+
         let key = match RENDER_ENGINE.register_root_component(view) {
             Ok(key) => key,
             Err(_e) => { panic!("Uhhhh this really messed up"); }

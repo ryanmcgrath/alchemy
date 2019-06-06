@@ -22,9 +22,10 @@ mod parser;
 mod span;
 
 use proc_macro::TokenStream;
-use proc_macro2::{TokenStream as TokenStream2, Literal};
+use proc_macro2::{Ident, TokenStream as TokenStream2, Literal, Span};
 use proc_macro_hack::proc_macro_hack;
 use quote::quote;
+use syn::{DeriveInput, parse_macro_input};
 
 use alchemy_styles::cssparser::{Parser, ParserInput, RuleListParser};
 use alchemy_styles::styles_parser::{Rule, RuleParser};
@@ -76,4 +77,31 @@ pub fn styles(input: TokenStream) -> TokenStream {
         #body
         styles
     })).into()
+}
+
+/// Implements a derive macro for automating props setting and conversion.
+#[proc_macro_derive(Props)]
+pub fn writable_props_derive(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    let name = &input.ident;
+    let name_props = Ident::new(&format!("{}Props", name), Span::call_site());
+    let generics = input.generics;
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+
+    TokenStream::from(quote! {
+        impl #impl_generics #name #ty_generics #where_clause {
+            fn default_props() -> #name_props {
+                #name_props::default()
+            }
+        }
+
+        impl #impl_generics alchemy::ComponentProps for #name #ty_generics #where_clause {
+            fn set_props(&mut self, new_props: &mut Any) {
+                match new_props.downcast_ref::<#name_props>() {
+                    Some(props) => { },
+                    None => { panic!("Woah there, somehow the wrong props were being passed!"); }
+                }
+            }
+        }
+    })
 }

@@ -1,12 +1,14 @@
 //! Traits that are used in Alchemy. Alchemy implements a React-based Component
 //! lifecycle, coupled with a delegate pattern inspired by those found in AppKit/UIKit.
 
+use std::any::Any;
+
 use alchemy_styles::styles::{Appearance, Layout};
 
 //use crate::RENDER_ENGINE;
 use crate::error::Error;
 use crate::reconciler::key::ComponentKey;
-use crate::rsx::{RSX, Props};
+use crate::rsx::RSX;
 
 /// A per-platform wrapped Pointer type, used for attaching views/widgets.
 #[cfg(feature = "cocoa")]
@@ -70,7 +72,9 @@ pub trait WindowDelegate: Send + Sync {
     fn render(&self) -> Result<RSX, Error> { Ok(RSX::None) }
 }
 
-pub trait State {}
+pub trait Props {
+    fn set_props(&mut self, new_props: &mut Any);
+}
 
 /// The `Component` lifecycle, mostly inspired from React, with a few extra methods for views that
 /// need to have a backing native layer. A good breakdown of the React Component lifecycle can be 
@@ -79,8 +83,8 @@ pub trait State {}
 /// Alchemy does not currently implement Hooks, and at the moment has no plans to do so (the API
 /// doesn't feel comfortable in Rust, in any way I tried). If you think you have an interesting
 /// proposal for this, feel free to open an issue!
-pub trait Component: Send + Sync {
-    fn constructor(key: ComponentKey) -> Self where Self: Sized;
+pub trait Component: Props + Send + Sync {
+    fn new(key: ComponentKey) -> Self where Self: Sized;
 
     /// Indicates whether a Component instance carries a native backing node. If you return `true`
     /// from this, the reconciler will opt-in to the native backing layer. Returns `false` by
@@ -91,16 +95,16 @@ pub trait Component: Send + Sync {
     fn borrow_native_backing_node(&self) -> Option<PlatformSpecificNodeType> { None }
 
     /// If you implement a Native-backed component, you'll need to implement this. Given a
-    /// `component`, you need to instruct the system how to append it to the tree at your point.
-    fn append_child_component(&self, _component: &Component) {}
+    /// `node`, you need to instruct the system how to append it to the tree at your point.
+    fn append_child_node(&self, _component: PlatformSpecificNodeType) {}
 
     /// If you implement a Native-backed component, you'll need to implement this. Given a
-    /// `component`, you need to instruct the system how to replace it in the tree at your point.
-    fn replace_child_component(&self, _component: &Component) {}
+    /// `node`, you need to instruct the system how to replace it in the tree at your point.
+    fn replace_child_node(&self, _component: PlatformSpecificNodeType) {}
 
     /// If you implement a Native-backed component, you'll need to implement this. Given a
-    /// `component`, you need to instruct the system how to remove it from the tree at your point.
-    fn remove_child_component(&self, _component: &Component) {}
+    /// `node`, you need to instruct the system how to remove it from the tree at your point.
+    fn remove_child_node(&self, _component: PlatformSpecificNodeType) {}
 
     /// Given a configured 'appearance' and computed `layout`, this method should transform them 
     /// into appropriate calls to the backing native node.
@@ -109,7 +113,7 @@ pub trait Component: Send + Sync {
     /// Invoked right before calling the render method, both on the initial mount and on subsequent updates.
     /// It should return an object to update the state, or null to update nothing.
     /// This method exists for rare use cases where the state depends on changes in props over time.
-    fn get_derived_state_from_props(&self, _props: Props) {}
+    fn get_derived_state_from_props(&self) {}
     
     /// Invoked right before the most recently rendered output is committed to the backing layer tree.
     /// It enables your component to capture some information from the tree (e.g. scroll position) before it's 
@@ -118,18 +122,18 @@ pub trait Component: Send + Sync {
     /// 
     /// This use case is not common, but it may occur in UIs like a chat thread that need to handle scroll 
     /// position in a special way. A snapshot value (or None) should be returned.
-    fn get_snapshot_before_update(&self, _props: Props) {}
+    fn get_snapshot_before_update(&self) {}
 
     /// Invoked immediately after a component is mounted (inserted into the tree).
     /// If you need to load data from a remote endpoint, this is a good place to instantiate the network request.
     /// This method is also a good place to set up any subscriptions. If you do that, don’t forget to unsubscribe 
     /// in component_will_unmount().
-    fn component_did_mount(&mut self, _props: &Props) {}
+    fn component_did_mount(&mut self) {}
 
     /// Invoked immediately after updating occurs. This method is not called for the initial render.
     /// This is also a good place to do network requests as long as you compare the current props to previous props 
     /// (e.g. a network request may not be necessary if the props have not changed).
-    fn component_did_update(&mut self, _props: &Props) {}
+    fn component_did_update(&mut self) {}
 
     /// Invoked immediately before a component is unmounted and destroyed. Perform any necessary cleanup in this 
     /// method, such as invalidating timers, canceling network requests, or cleaning up any subscriptions that 
@@ -137,12 +141,12 @@ pub trait Component: Send + Sync {
     /// 
     /// You should not call set state in this method because the component will never be re-rendered. Once a 
     /// component instance is unmounted, it will never be mounted again.
-    fn component_will_unmount(&mut self, _props: &Props) {}
+    fn component_will_unmount(&mut self) {}
 
     /// Invoked after an error has been thrown by a descendant component. Called during the "commit" phase, 
     /// so side-effects are permitted. It should be used for things like logging errors (e.g,
     /// Sentry).
-    fn component_did_catch(&mut self, _props: &Props/* error: */) {}
+    fn component_did_catch(&mut self /* error: */) {}
 
     /// Use this to let Alchemy know if a component’s output is not affected by the current change in state 
     /// or props. The default behavior is to re-render on every state change, and in the vast majority of 
@@ -161,11 +165,11 @@ pub trait Component: Send + Sync {
     /// returns the same result each time it’s invoked, and it does not directly interact with the 
     /// backing rendering framework.
     ///
-    /// If you need to interact with the browser, perform your work in component_did_mount() or the other 
+    /// If you need to interact with the native layer, perform your work in component_did_mount() or the other 
     /// lifecycle methods instead. Keeping `render()` pure makes components easier to think about.
     ///
     /// This method is not called if should_component_update() returns `false`.
-    fn render(&self, _props: &Props) -> Result<RSX, Error> { Ok(RSX::None) }
+    fn render(&self, children: Vec<RSX>) -> Result<RSX, Error> { Ok(RSX::None) }
 
     /// This lifecycle is invoked after an error has been thrown by a descendant component. It receives 
     /// the error that was thrown as a parameter and should return a value to update state.

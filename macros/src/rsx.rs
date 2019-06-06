@@ -125,8 +125,7 @@ impl Element {
             let name = key.to_string();
             let token = TokenTree::Ident(ident::new_raw(&name, key.span()));
             (name, token, value)
-        });
-        
+        }); 
        
         let mut attributes = TokenStream::new();
         let mut styles = TokenStream::new();
@@ -159,29 +158,29 @@ impl Element {
                         eprintln_msg += "\nERROR: rebuild with nightly to print source location";
                     }
 
-                    //body.extend(quote!(
-                        /*element.attrs.#key = Some(#lit.parse().unwrap_or_else(|err| {
+                    attributes.extend(quote!(
+                        props.#key = #lit.parse().unwrap_or_else(|err| {
                             eprintln!(#eprintln_msg, err);
-                            panic!("failed to parse string literal");
-                        }));*/
-                    //));
+                            panic!("Failed to parse string literal");
+                        });
+                    ));
                 },
 
                 value => {
-                    let key = key.to_string();
+                    let prop = key.to_string();
                     let value = process_value(value);
                     
-                    if key == "r#styles" {
+                    if prop == "r#styles" {
                         styles = quote!(std::convert::Into::into(#value));
                         continue;
                     }
 
-                    if key == "r#key" {
+                    if prop == "r#key" {
                         continue;
                     }
 
                     attributes.extend(quote!(
-                        attributes.insert(#key, std::convert::Into::into(#value));
+                        props.#key = std::convert::Into::into(#value);
                     ));
                 }
             }
@@ -219,19 +218,19 @@ impl Element {
 
         let component_name = Literal::string(&typename.to_string());
 
-        Ok(quote!(
-            alchemy::RSX::node(#component_name, |key| {
-                Box::new(#typename::constructor(key))
-            }, alchemy::Props::new("".into(), #styles, {
-                let mut attributes = std::collections::HashMap::new();
+        Ok(quote! {
+            alchemy::RSX::node(#component_name, #styles, |key| {
+                Box::new(<#typename as alchemy::Component>::new(key))
+            }, {
+                let props = #typename::default_props();
                 #attributes
-                attributes
+                Box::new(props)
             }, {
                 let mut children = vec![];
                 #children
                 children
-            }))
-        ))
+            })
+        })
     }
 }
 

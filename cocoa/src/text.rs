@@ -24,6 +24,7 @@ static ALCHEMY_DELEGATE: &str = "alchemyDelegate";
 /// colors and so forth.
 #[derive(Debug)]
 pub struct Text {
+    text: String,
     inner_mut: Id<Object>,
     inner_share: ShareId<Object>,
     background_color: Id<Object>,
@@ -49,6 +50,7 @@ impl Text {
         };
 
         Text {
+            text: "".into(),
             inner_mut: inner_mut,
             inner_share: inner_share,
             background_color: Color::transparent().into_nscolor(),
@@ -88,9 +90,13 @@ impl Text {
         }
     }
 
-    pub fn set_text(&mut self, text: &str) {
+    pub fn set_text(&mut self, text: String) {
+        self.text = text;
+    }
+
+    pub fn render(&mut self) {
         unsafe {
-            let string_value = NSString::alloc(nil).init_str(text);
+            let string_value = NSString::alloc(nil).init_str(&self.text);
             msg_send![&*self.inner_mut, setStringValue:string_value];
         }
     }

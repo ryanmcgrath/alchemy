@@ -8,11 +8,10 @@ use std::error::Error;
 
 use alchemy_styles::THEME_ENGINE;
 use alchemy_styles::styles::{Appearance, Dimension, Number, Size, Style};
-
-use crate::traits::Component;
-use crate::rsx::{Props, RSX, VirtualNode};
-
 use alchemy_styles::stretch::node::{Node as LayoutNode, Stretch as LayoutStore};
+
+use crate::rsx::{RSX, VirtualNode};
+use crate::traits::Component;
 
 pub mod key;
 use key::ComponentKey;
@@ -26,16 +25,10 @@ use error::RenderEngineError;
 mod instance;
 use instance::Instance;
 
-/// This is never actually created, and is here primarily to avoid a circular
-/// depedency issue (we can't import the View from alchemy's core crate, since the core crate
-/// depends on this crate).
+mod generic_root_view_stub;
+use generic_root_view_stub::{GenericRootView, GenericRootViewProps};
 
-pub struct GenericRootView;
-impl Component for GenericRootView {
-    fn constructor(key: ComponentKey) -> GenericRootView {
-        GenericRootView {}
-    }
-}
+struct GenericRootProps;
 
 pub struct RenderEngine {
     queued_state_updates: Mutex<Vec<i32>>,
@@ -60,25 +53,24 @@ impl RenderEngine {
     /// they get a key back. When they want to instruct the global `RenderEngine` 
     /// to re-render or update their tree, they pass that key and whatever the new tree 
     /// should be.
-    pub fn register_root_component<C: Component + 'static>(&self, instance: C) -> Result<ComponentKey, Box<Error>> {
+    pub fn register_root_component<C: Component + 'static>(&self, component: C) -> Result<ComponentKey, Box<Error>> {
         // Conceivably, this doesn't NEED to be a thing... but for now it is. If you've stumbled
         // upon here, wayward traveler, in need of a non-native-root-component, please open an
         // issue to discuss. :)
-        if !instance.has_native_backing_node() {
+        if !component.has_native_backing_node() {
             return Err(Box::new(RenderEngineError::InvalidRootComponent {}));
         }
 
         let mut component_store = self.components.lock().unwrap();
+        let mut layouts_store = self.layouts.lock().unwrap();
         let component_key = component_store.new_key();
-        component_store.insert(component_key, Instance::new("root", Box::new(instance), {
-            let mut props = Props::default();
-            props.styles = "root".into();
-            props
-        }, {
-            let mut layouts_store = self.layouts.lock().unwrap();
-            let style = Style::default();
-            Some(layouts_store.new_node(style, vec![])?)
-        }))?;
+        component_store.insert(component_key, Instance {
+            tag: "root",
+            style_keys: "root".into(),
+            component: Box::new(component),
+            appearance: Appearance::default(),
+            layout: Some(layouts_store.new_node(Style::default(), vec![])?)
+        })?;
 
         Ok(component_key)
     }
@@ -97,19 +89,19 @@ impl RenderEngine {
         let mut component_store = self.components.lock().unwrap();
         let mut layout_store = self.layouts.lock().unwrap();
 
-        let new_root_node = RSX::node("root", |_| {
+        let new_root_node = RSX::node("root", "root".into(), |_| {
             Box::new(GenericRootView {})
-        }, Props::root(match child {
+        }, Box::new(GenericRootViewProps {}), match child {
             RSX::VirtualNode(node) => {
                 if node.tag == "Fragment" {
-                    node.props.children
+                    node.children
                 } else {
                     vec![RSX::VirtualNode(node)]
                 }
             },
 
             _ => vec![]
-        }));
+        });
 
         recursively_diff_tree(key, new_root_node, &mut component_store, &mut layout_store)?;
 
@@ -117,7 +109,7 @@ impl RenderEngine {
             let mut root_instance = component_store.get_mut(key)?;
             let layout = root_instance.layout.unwrap();
             let mut style = Style::default();
-            THEME_ENGINE.configure_styles_for_keys(&root_instance.props.styles, &mut style, &mut root_instance.appearance);
+            THEME_ENGINE.configure_styles_for_keys(&root_instance.style_keys, &mut style, &mut root_instance.appearance);
             style.size = Size {
                 width: Dimension::Points(dimensions.0 as f32),
                 height: Dimension::Points(dimensions.1 as f32)
@@ -179,7 +171,7 @@ fn recursively_diff_tree(
     old_children.reverse();
 
     if let RSX::VirtualNode(mut child) = new_tree {
-        for new_child_tree in child.props.children {
+        for new_child_tree in child.children {
             match old_children.pop() {
                 // If there's a key in the old children for this position, it's 
                 // something we need to update, so let's recurse right back into it.
@@ -238,14 +230,21 @@ fn mount_component_tree(
     let is_native_backed = component.has_native_backing_node();
     
     // let state = get_derived_state_from_props()
-    let mut instance = Instance::new(tree.tag, component, tree.props, None);
+    let mut instance = Instance {
+        tag: tree.tag,
+        style_keys: tree.styles,
+        component: component,
+        appearance: Appearance::default(),
+        layout: None
+    };
+
     if is_native_backed {
         let mut style = Style::default();
-        THEME_ENGINE.configure_styles_for_keys(&instance.props.styles, &mut style, &mut instance.appearance);
+        THEME_ENGINE.configure_styles_for_keys(&instance.style_keys, &mut style, &mut instance.appearance);
         instance.layout = Some(layout_store.new_node(style, vec![])?);
     }
     
-    let rendered = instance.component.render(&instance.props);
+    let rendered = instance.component.render(tree.children);
     // instance.get_snapshot_before_update()
     component_store.insert(key, instance)?;
 
@@ -256,7 +255,7 @@ fn mount_component_tree(
             // tag similar to what React does, which just hoists the children out of it and
             // discards the rest.
             if child.tag == "Fragment" {
-                for child_tree in child.props.children {
+                for child_tree in child.children {
                     if let RSX::VirtualNode(child_tree) = child_tree {
                         let child_key = mount_component_tree(child_tree, component_store, layout_store)?;
                         
@@ -286,7 +285,7 @@ fn mount_component_tree(
     }
 
     let instance_lol = component_store.get_mut(key)?;
-    instance_lol.component.component_did_mount(&instance_lol.props);
+    instance_lol.component.component_did_mount();
 
     Ok(key)
 }
@@ -301,7 +300,7 @@ fn unmount_component_tree(
     layout_store: &mut LayoutStore
 ) -> Result<Vec<LayoutNode>, Box<Error>> {
     let mut instance = component_store.remove(key)?;
-    instance.component.component_will_unmount(&instance.props);
+    instance.component.component_will_unmount();
     
     let mut layout_nodes = vec![];
     
@@ -342,7 +341,11 @@ fn link_layout_nodess(
     if let (Ok(parent_instance), Ok(child_instance)) = (components.get(parent), components.get(child)) {
         if let (Some(parent_layout), Some(child_layout)) = (parent_instance.layout, child_instance.layout) {
             layouts.add_child(parent_layout, child_layout)?;
-            parent_instance.component.append_child_component(&*child_instance.component);
+
+            if let Some(platform_node) = child_instance.component.borrow_native_backing_node() {
+                parent_instance.component.append_child_node(platform_node);
+            }
+
             return Ok(());
         }
     }

@@ -30,7 +30,7 @@ impl Window {
     /// Creates a new `NSWindow` instance, configures it appropriately (e.g, titlebar appearance),
     /// injects an `NSObject` delegate wrapper, and retains the necessary Objective-C runtime
     /// pointers.
-    pub fn new<T: AppDelegate>(window_id: usize, content_view: &Component, app_ptr: *const T) -> Window {
+    pub fn new<T: AppDelegate>(window_id: usize, content_view: ShareId<Object>, app_ptr: *const T) -> Window {
         let dimensions = NSRect::new(NSPoint::new(0., 0.), NSSize::new(0., 0.));
 
         let style = NSWindowStyleMask::NSResizableWindowMask |
@@ -53,9 +53,9 @@ impl Window {
             // Objective-C runtime gets out of sync.
             msg_send![window, setReleasedWhenClosed:NO];
             
-            if let Some(view_ptr) = content_view.borrow_native_backing_node() {
-                msg_send![window, setContentView:view_ptr];
-            }
+            //if let Some(view_ptr) = content_view.borrow_native_backing_node() {
+                msg_send![window, setContentView:content_view];
+            //}
 
             ShareId::from_ptr(window)
         };

@@ -11,12 +11,12 @@ use proc_macro_hack::proc_macro_hack;
 
 pub use alchemy_lifecycle::ComponentKey;
 pub use alchemy_lifecycle::traits::{
-    AppDelegate, Component, WindowDelegate
+    AppDelegate, Component, Props, WindowDelegate
 };
 
 pub use alchemy_lifecycle::error::Error;
 pub use alchemy_lifecycle::rsx::{
-    Props, RSX, VirtualNode, VirtualText
+    RSX, VirtualNode, VirtualText
 };
 
 #[proc_macro_hack(support_nested)]

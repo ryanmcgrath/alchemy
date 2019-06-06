@@ -9,13 +9,15 @@ use alchemy_styles::{Appearance, Layout, StylesList};
 
 use alchemy_lifecycle::ComponentKey;
 use alchemy_lifecycle::error::Error;
-use alchemy_lifecycle::rsx::{Props, RSX};
-use alchemy_lifecycle::traits::{Component, PlatformSpecificNodeType};
+use alchemy_lifecycle::rsx::RSX;
+use alchemy_lifecycle::traits::{Component, Props, PlatformSpecificNodeType};
 
 use crate::components::Fragment;
 
 #[cfg(feature = "cocoa")]
 use alchemy_cocoa::view::{View as PlatformViewBridge};
+
+pub struct ViewProps;
 
 /// Views are the most basic piece of the API. If you want to display something, you'll
 /// probably be reaching for a View first and foremost.
@@ -25,44 +27,53 @@ use alchemy_cocoa::view::{View as PlatformViewBridge};
 /// ```
 /// <View styles=["styleKey1", "styleKey2"] />
 /// ```
-pub struct View(Mutex<PlatformViewBridge>);
+pub struct View {
+    bridge: Mutex<PlatformViewBridge>
+}
 
 impl Default for View {
     fn default() -> View {
-        View(Mutex::new(PlatformViewBridge::new()))
+        View {
+            bridge: Mutex::new(PlatformViewBridge::new())
+        }
     }
 }
 
+impl View {
+    pub fn default_props() -> ViewProps {
+        ViewProps {}
+    }
+}
+
+impl Props for View {
+    fn set_props(&mut self, _: &mut std::any::Any) {}
+}
+
 impl Component for View {
-    fn constructor(_key: ComponentKey) -> View {
-        View(Mutex::new(PlatformViewBridge::new()))
+    fn new(_: ComponentKey) -> View {
+        View::default()
     }
 
     fn has_native_backing_node(&self) -> bool { true }
     
     fn borrow_native_backing_node(&self) -> Option<PlatformSpecificNodeType> {
-        let bridge = self.0.lock().unwrap();
+        let bridge = self.bridge.lock().unwrap();
         Some(bridge.borrow_native_backing_node())
     }
 
-    fn append_child_component(&self, component: &Component) {
-        if let Some(child) = component.borrow_native_backing_node() {
-            let mut bridge = self.0.lock().unwrap();
-            bridge.append_child(child);
-        }
+    fn append_child_node(&self, node: PlatformSpecificNodeType) {
+        let mut bridge = self.bridge.lock().unwrap();
+        bridge.append_child(node);
     }
 
     fn apply_styles(&self, appearance: &Appearance, layout: &Layout) {
-        let mut bridge = self.0.lock().unwrap();
+        let mut bridge = self.bridge.lock().unwrap();
         bridge.apply_styles(appearance, layout);
     }
 
-    fn render(&self, props: &Props) -> Result<RSX, Error> {
-        Ok(RSX::node("Fragment", |key| Box::new(Fragment::constructor(key)), Props {
-            attributes: std::collections::HashMap::new(),
-            key: "".into(),
-            styles: StylesList::new(),
-            children: props.children.clone()
-        }))
+    fn render(&self, children: Vec<RSX>) -> Result<RSX, Error> {
+        Ok(RSX::node("Fragment", "".into(), |key| {
+            Box::new(<Fragment as Component>::new(key))
+        }, Box::new(ViewProps {}), children))
     }
 }

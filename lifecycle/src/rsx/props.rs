@@ -31,7 +31,7 @@ impl<'a> From<&'a str> for AttributeType {
 #[derive(Clone, Debug, Default)]
 pub struct Props {
     pub attributes: HashMap<&'static str, AttributeType>,
-    pub children: Vec<RSX>,
+    //pub children: Vec<RSX>,
     pub key: String,
     pub styles: StylesList
 }
@@ -42,17 +42,17 @@ impl Props {
         key: String,
         styles: StylesList,
         attributes: HashMap<&'static str, AttributeType>,
-        children: Vec<RSX>
+        //children: Vec<RSX>
     ) -> Props {
         Props {
             attributes: attributes,
-            children: children,
+            //children: children,
             key: key,
             styles: styles
         }
     }
 
-    /// A helper method used for constructing root-level Properties.
+    /*/// A helper method used for constructing root-level Properties.
     pub(crate) fn root(children: Vec<RSX>) -> Props {
         Props {
             attributes: HashMap::new(),
@@ -65,7 +65,7 @@ impl Props {
     /// Returns a Vec of RSX nodes, which are really just cloned pointers for the most part.
     pub fn children(&self) -> Vec<RSX> {
         self.children.clone()
-    }
+    }*/
 
     /// Returns a Option<&AttributeType> from the `attributes` inner HashMap.
     pub fn get(&self, key: &str) -> Option<&AttributeType> {

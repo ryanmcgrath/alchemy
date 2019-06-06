@@ -5,7 +5,9 @@
 //! just allow returning arbitrary iterators.
 
 use alchemy_lifecycle::ComponentKey;
-use alchemy_lifecycle::traits::Component;
+use alchemy_lifecycle::traits::{Component, Props};
+
+pub struct FragmentProps;
 
 /// Fragments are special - you can do something like the following in cases where you
 /// want to render some views without requiring an intermediate view.
@@ -20,8 +22,18 @@ use alchemy_lifecycle::traits::Component;
 #[derive(Default, Debug)]
 pub struct Fragment;
 
+impl Fragment {
+    fn default_props() -> FragmentProps {
+        FragmentProps {}
+    }
+}
+
+impl Props for Fragment {
+    fn set_props(&mut self, _: &mut std::any::Any) {}
+}
+
 impl Component for Fragment {
-    fn constructor(_key: ComponentKey) -> Fragment {
-        Fragment { }
+    fn new(_: ComponentKey) -> Fragment {
+        Fragment {}
     }
 }
