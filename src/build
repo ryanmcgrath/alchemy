@@ -1,0 +1,8 @@
+#!/bin/bash
+# Feel free to change this via pull request if you want a different shell. ;P
+
+
+rm -rf ../css ../images ../favicons
+zola build
+mv public/* ../
+rm -rf public

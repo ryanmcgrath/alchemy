@@ -1,8 +1,0 @@
-[package]
-name = "layout"
-version = "0.1.0"
-authors = ["Ryan McGrath <ryan@rymc.io>"]
-edition = "2018"
-
-[dependencies]
-alchemy = { path = "../../alchemy", version = "0.2.0", features = ["cocoa"] }
