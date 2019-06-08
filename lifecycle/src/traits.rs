@@ -15,8 +15,9 @@ use crate::rsx::RSX;
 pub type PlatformSpecificNodeType = objc_id::ShareId<objc::runtime::Object>;
 
 /// A per-platform wrapped Pointer type, used for attaching views/widgets.
-#[cfg(not(feature = "cocoa"))]
+#[cfg(feature = "gtkrs")]
 pub type PlatformSpecificNodeType = ();
+//pub type PlatformSpecificNodeType = gtk::WidgetExt;
 
 /*fn update<C: Component, F: Fn() -> Box<C> + Send + Sync + 'static>(component: &Component, updater: F) {
     let component_ptr = component as *const C as usize;
@@ -26,7 +27,7 @@ pub type PlatformSpecificNodeType = ();
 /// Each platform tends to have their own startup routine, their own runloop, and so on.
 /// Alchemy recognizes this and provides an `AppDelegate` that receives events at a system
 /// level and allows the user to operate within the established framework per-system.
-pub trait AppDelegate: Send + Sync {
+pub trait AppDelegate {
     /// Fired when an Application is about to finish launching.
     fn will_finish_launching(&mut self) {}
 
@@ -61,7 +62,7 @@ pub trait AppDelegate: Send + Sync {
 
 /// Each platform has their own `Window` API, which Alchemy attempts to pair down to one consistent
 /// API. This also acts as the bootstrapping point for a `render` tree.
-pub trait WindowDelegate: Send + Sync {
+pub trait WindowDelegate {
     /// Fired when this Window will close. You can use this to clean up or destroy resources,
     /// timers, and other things.
     fn will_close(&mut self) { }
@@ -169,7 +170,7 @@ pub trait Component: Props + Send + Sync {
     /// lifecycle methods instead. Keeping `render()` pure makes components easier to think about.
     ///
     /// This method is not called if should_component_update() returns `false`.
-    fn render(&self, children: Vec<RSX>) -> Result<RSX, Error> { Ok(RSX::None) }
+    fn render(&self, _children: Vec<RSX>) -> Result<RSX, Error> { Ok(RSX::None) }
 
     /// This lifecycle is invoked after an error has been thrown by a descendant component. It receives 
     /// the error that was thrown as a parameter and should return a value to update state.

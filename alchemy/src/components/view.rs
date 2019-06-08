@@ -17,6 +17,9 @@ use crate::components::Fragment;
 #[cfg(feature = "cocoa")]
 use alchemy_cocoa::view::{View as PlatformViewBridge};
 
+#[cfg(feature = "gtkrs")]
+use alchemy_gtkrs::view::{View as PlatformViewBridge};
+
 pub struct ViewProps;
 
 /// Views are the most basic piece of the API. If you want to display something, you'll

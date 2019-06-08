@@ -15,6 +15,9 @@ use alchemy_lifecycle::traits::{Component, Props, PlatformSpecificNodeType};
 #[cfg(feature = "cocoa")]
 use alchemy_cocoa::text::{Text as PlatformTextBridge};
 
+#[cfg(feature = "gtkrs")]
+use alchemy_gtkrs::text::{Text as PlatformTextBridge};
+
 pub struct TextProps;
 
 /// Text rendering is a complicated mess, and being able to defer to the

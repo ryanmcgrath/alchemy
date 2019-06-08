@@ -1,0 +1,19 @@
+[package]
+name = "alchemy-gtkrs"
+description = "GTK bindings for Alchemy, a cross-platform GUI framework written in Rust."
+version = "0.1.0"
+edition = "2018"
+authors = ["Ryan McGrath <ryan@rymc.io>"]
+license = "MPL-2.0+"
+repository = "https://github.com/ryanmcgrath/alchemy"
+categories = ["gui", "rendering::engine", "multimedia"]
+keywords = ["gui", "gtk", "react"]
+
+[badges]
+maintenance = { status = "actively-developed" }
+
+[dependencies]
+alchemy-lifecycle = { version = "0.1", path = "../lifecycle", features = ["gtkrs"] }
+alchemy-styles = { version = "0.1", path = "../styles" }
+gtk = { version = "0.6.0", features = ["v3_16"] }
+gio = "0.6.0"

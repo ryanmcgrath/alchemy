@@ -5,4 +5,4 @@ authors = ["Ryan McGrath <ryan@rymc.io>"]
 edition = "2018"
 
 [dependencies]
-alchemy = { path = "../../alchemy", version = "0.2.0", features = ["cocoa"] }
+alchemy = { path = "../../alchemy", version = "0.2.0", features = ["gtkrs"] }

@@ -114,7 +114,7 @@ impl RenderEngine {
                 width: Dimension::Points(dimensions.0 as f32),
                 height: Dimension::Points(dimensions.1 as f32)
             };
-            layout_store.set_style(layout, style);
+            layout_store.set_style(layout, style)?;
             layout
         };
 

@@ -13,10 +13,13 @@ keywords = ["gui", "css", "styles", "layout", "react"]
 maintenance = { status = "actively-developed" }
 
 [features]
+default = []
 cocoa = ["alchemy-cocoa", "alchemy-lifecycle/cocoa"]
+gtkrs = ["alchemy-gtkrs", "alchemy-lifecycle/gtkrs"]
 
 [dependencies]
 alchemy-cocoa = { version = "0.1", path = "../cocoa", optional = true }
+alchemy-gtkrs = { version = "0.1", path = "../gtk", optional = true }
 alchemy-lifecycle = { version = "0.1", path = "../lifecycle" }
 alchemy-macros = { version = "0.1", path = "../macros" }
 alchemy-styles = { version = "0.1", path = "../styles", features = ["parser"] }

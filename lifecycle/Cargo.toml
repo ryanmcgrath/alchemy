@@ -10,10 +10,13 @@ categories = ["gui", "rendering::engine", "multimedia"]
 keywords = ["gui", "css", "styles", "layout", "ui"]
 
 [features]
+default = []
 cocoa = ["objc", "objc_id"]
+gtkrs = ["gtk"]
 
 [dependencies]
 alchemy-styles = { version = "0.1", path = "../styles" }
+gtk = { version = "0.6.0", features = ["v3_16"], optional = true }
 objc = { version = "0.2.6", optional = true }
 objc_id = { version = "0.1.1", optional = true }
 serde_json = "1"
