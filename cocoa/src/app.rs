@@ -1,7 +1,7 @@
 //! A wrapper for `NSApplication` on macOS. If you opt in to the `cocoa` feature on
 //! Alchemy, this will loop system-level application events back to your `AppDelegate`.
 
-use std::sync::{Once, ONCE_INIT};
+use std::sync::{Once};
 
 use cocoa::base::{id, nil};
 use cocoa::appkit::{NSApplication, NSRunningApplication};
@@ -15,7 +15,7 @@ use alchemy_lifecycle::traits::AppDelegate;
 
 static ALCHEMY_APP_PTR: &str = "alchemyParentAppPtr";
 
-/// A wrapper for `NSApplication`. It holds (retains) pointers for the Objective-C runtime, 
+/// A wrapper for `NSApplication`. It holds (retains) pointers for the Objective-C runtime,
 /// which is where our application instance lives. It also injects an `NSObject` subclass,
 /// which acts as the Delegate, looping back into our Alchemy shared application.
 pub struct App {
@@ -34,7 +34,7 @@ impl App {
             app.setActivationPolicy_(cocoa::appkit::NSApplicationActivationPolicyRegular);
             Id::from_ptr(app)
         };
-        
+
         let delegate = unsafe {
             let delegate_class = register_app_delegate_class::<T>();
             let delegate: id = msg_send![delegate_class, new];
@@ -127,7 +127,7 @@ extern fn will_terminate<T: AppDelegate>(this: &Object, _: Sel, _: id) {
 /// pointers we need to have.
 fn register_app_delegate_class<T: AppDelegate>() -> *const Class {
     static mut DELEGATE_CLASS: *const Class = 0 as *const Class;
-    static INIT: Once = ONCE_INIT;
+    static INIT: Once = Once::new();
 
     INIT.call_once(|| unsafe {
         let superclass = Class::get("NSObject").unwrap();

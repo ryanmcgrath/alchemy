@@ -2,7 +2,7 @@
 //! Cocoa and associated widgets. This also handles looping back
 //! lifecycle events, such as window resizing or close events.
 
-use std::sync::{Once, ONCE_INIT};
+use std::sync::{Once};
 
 use cocoa::base::{id, nil, YES, NO};
 use cocoa::appkit::{NSWindow, NSWindowStyleMask, NSBackingStoreType};
@@ -19,7 +19,7 @@ use alchemy_styles::Appearance;
 static APP_PTR: &str = "alchemyAppPtr";
 static WINDOW_MANAGER_ID: &str = "alchemyWindowManagerID";
 
-/// A wrapper for `NSWindow`. Holds (retains) pointers for the Objective-C runtime 
+/// A wrapper for `NSWindow`. Holds (retains) pointers for the Objective-C runtime
 /// where our `NSWindow` and associated delegate live.
 pub struct Window {
     pub inner: ShareId<Object>,
@@ -39,7 +39,7 @@ impl Window {
 
         let inner = unsafe {
             let window = NSWindow::alloc(nil).initWithContentRect_styleMask_backing_defer_(
-                dimensions, 
+                dimensions,
                 style,
                 NSBackingStoreType::NSBackingStoreBuffered,
                 NO
@@ -52,14 +52,14 @@ impl Window {
             // to disable, like... this. If we don't set this, we'll segfault entirely because the
             // Objective-C runtime gets out of sync.
             msg_send![window, setReleasedWhenClosed:NO];
-            
+
             //if let Some(view_ptr) = content_view.borrow_native_backing_node() {
                 msg_send![window, setContentView:content_view];
             //}
 
             ShareId::from_ptr(window)
         };
-        
+
         let delegate = unsafe {
             let delegate_class = register_window_class::<T>();
             let delegate: id = msg_send![delegate_class, new];
@@ -128,7 +128,7 @@ impl Drop for Window {
     /// safer than sorry.
     fn drop(&mut self) {
         // This bridging link needs to be broken on Drop.
-        unsafe { 
+        unsafe {
             msg_send![&*self.inner, setDelegate:nil];
         }
     }
@@ -149,7 +149,7 @@ extern fn will_close<T: AppDelegate>(this: &Object, _: Sel, _: id) {
 /// need to do.
 fn register_window_class<T: AppDelegate>() -> *const Class {
     static mut DELEGATE_CLASS: *const Class = 0 as *const Class;
-    static INIT: Once = ONCE_INIT;
+    static INIT: Once = Once::new();
 
     INIT.call_once(|| unsafe {
         let superclass = Class::get("NSObject").unwrap();
@@ -157,9 +157,9 @@ fn register_window_class<T: AppDelegate>() -> *const Class {
 
         decl.add_ivar::<usize>(APP_PTR);
         decl.add_ivar::<usize>(WINDOW_MANAGER_ID);
-        
+
         decl.add_method(sel!(windowWillClose:), will_close::<T> as extern fn(&Object, _, _));
-        
+
         DELEGATE_CLASS = decl.register();
     });
 

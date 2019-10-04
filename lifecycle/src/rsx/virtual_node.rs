@@ -22,12 +22,12 @@ pub struct VirtualNode {
 
     /// `Component` instances are created on-demand, if the reconciler deems it be so. This
     /// is a closure that should return an instance of the correct type.
-    pub create_component_fn: fn(key: ComponentKey) -> Box<Component>,
+    pub create_component_fn: fn(key: ComponentKey) -> Box<dyn Component>,
 
     /// When some RSX is returned, we scoop up the props inside a special block, and then shove
-    /// them in here as an `Any` object. When you `derive(Props)` on a `Component` struct, it 
+    /// them in here as an `Any` object. When you `derive(Props)` on a `Component` struct, it
     /// creates a setter that specifically handles downcasting and persisting props for you.
-    pub props: Box<Any>,
+    pub props: Box<dyn Any>,
 
     /// Child components for this node.
     pub children: Vec<RSX>

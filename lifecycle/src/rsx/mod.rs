@@ -31,7 +31,7 @@ impl RSX {
     pub fn node<P: Any + 'static>(
         tag: &'static str,
         styles: StylesList,
-        create_fn: fn(key: ComponentKey) -> Box<Component>,
+        create_fn: fn(key: ComponentKey) -> Box<dyn Component>,
         props: P,
         children: Vec<RSX>
     ) -> RSX {
@@ -43,9 +43,9 @@ impl RSX {
             children: children
         })
     }
-    
+
     /// Shorthand method for creating a new `RSX::VirtualText` instance. Rarely should you call
-    /// this yourself; the `rsx! {}` and `text!()` macros handle this for you. 
+    /// this yourself; the `rsx! {}` and `text!()` macros handle this for you.
     pub fn text(s: String) -> RSX {
         RSX::VirtualText(VirtualText(s))
     }

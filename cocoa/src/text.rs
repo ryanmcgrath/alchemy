@@ -1,7 +1,7 @@
 //! This wraps NTextField on macOS, and configures it to act like a label
 //! with standard behavior that most users would expect.
 
-use std::sync::{Once, ONCE_INIT};
+use std::sync::{Once};
 
 use objc_id::{Id, ShareId};
 use objc::{msg_send, sel, sel_impl};
@@ -19,7 +19,7 @@ use alchemy_lifecycle::traits::PlatformSpecificNodeType;
 
 static ALCHEMY_DELEGATE: &str = "alchemyDelegate";
 
-/// A wrapper for `NSText`. This holds retained pointers for the Objective-C 
+/// A wrapper for `NSText`. This holds retained pointers for the Objective-C
 /// runtime - namely, the view itself, and associated things such as background
 /// colors and so forth.
 #[derive(Debug)]
@@ -83,7 +83,7 @@ impl Text {
 
             self.background_color = appearance.background_color.into_nscolor();
             self.text_color = appearance.text_color.into_nscolor();
-            
+
             msg_send![&*self.inner_mut, setFrame:rect];
             msg_send![&*self.inner_mut, setBackgroundColor:&*self.background_color];
             msg_send![&*self.inner_mut, setTextColor:&*self.text_color];
@@ -112,12 +112,12 @@ extern fn enforce_normalcy(_: &Object, _: Sel) -> BOOL {
 /// to store.
 fn register_class() -> *const Class {
     static mut VIEW_CLASS: *const Class = 0 as *const Class;
-    static INIT: Once = ONCE_INIT;
+    static INIT: Once = Once::new();
 
     INIT.call_once(|| unsafe {
         let superclass = Class::get("NSTextField").unwrap();
         let mut decl = ClassDecl::new("AlchemyTextField", superclass).unwrap();
-        
+
         // Force NSText to render from the top-left, not bottom-left
         //decl.add_method(sel!(isFlipped), enforce_normalcy as extern fn(&Object, _) -> BOOL);
 
@@ -132,7 +132,7 @@ fn register_class() -> *const Class {
         // Note that NSText's don't really have a "delegate", I'm just using it here
         // for common terminology sake.
         decl.add_ivar::<usize>(ALCHEMY_DELEGATE);
-       
+
         VIEW_CLASS = decl.register();
     });
 

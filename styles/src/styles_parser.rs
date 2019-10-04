@@ -67,7 +67,7 @@ impl<'i> QualifiedRuleParser<'i> for RuleParser {
         let styles = DeclarationListParser::new(input, StyleParser {}).collect::<Vec<_>>();
 
         Ok(Rule {
-            key: key,
+            key,
             styles: styles.into_iter().filter_map(|decl| {
                 if !decl.is_ok() {
                     eprintln!("{:?}", decl);
@@ -119,7 +119,7 @@ impl<'i> DeclarationParser<'i> for StyleParser {
                 "space-around" => Styles::AlignContent(AlignContent::SpaceAround),
                 _ => { return Err(s.new_unexpected_token_error(t.clone())); }
             }},
-            
+
             "align-items" => { let s = input.current_source_location(); let t = input.next()?; match ident(&t) {
                 "flex-start" => Styles::AlignItems(AlignItems::FlexStart),
                 "flex-end" => Styles::AlignItems(AlignItems::FlexEnd),
@@ -128,7 +128,7 @@ impl<'i> DeclarationParser<'i> for StyleParser {
                 "stretch" => Styles::AlignItems(AlignItems::Stretch),
                 _ => { return Err(s.new_unexpected_token_error(t.clone())); }
             }},
-            
+
             "align_self" => { let s = input.current_source_location(); let t = input.next()?; match ident(&t) {
                 "auto" => Styles::AlignSelf(AlignSelf::Auto),
                 "flex-start" => Styles::AlignSelf(AlignSelf::FlexStart),
@@ -149,14 +149,14 @@ impl<'i> DeclarationParser<'i> for StyleParser {
             }},
 
             "background-color" => Styles::BackgroundColor(Color::parse(input)?),
-            
+
             // Border values~
             "border-color" => Styles::BorderColor(Color::parse(input)?),
             "border-top-color" => Styles::BorderTopColor(Color::parse(input)?),
             "border-bottom-color" => Styles::BorderBottomColor(Color::parse(input)?),
             "border-left-color" => Styles::BorderLeftColor(Color::parse(input)?),
             "border-right-color" => Styles::BorderRightColor(Color::parse(input)?),
-            
+
             "bottom" => Styles::Bottom(parse_floaty_mcfloatface_value(input)?),
 
             "color" => Styles::TextColor(Color::parse(input)?),
@@ -173,11 +173,11 @@ impl<'i> DeclarationParser<'i> for StyleParser {
                 "none" => Styles::Display(Display::None),
                 _ => { return Err(s.new_unexpected_token_error(t.clone())); }
             }},
-            
+
             "end" => Styles::End(parse_floaty_mcfloatface_value(input)?),
 
             "flex-basis" => Styles::FlexBasis(parse_floaty_mcfloatface_value(input)?),
-            
+
             "flex-direction" => { let s = input.current_source_location(); let t = input.next()?; match ident(&t) {
                 "row" => Styles::FlexDirection(FlexDirection::Row),
                 "row-reverse" => Styles::FlexDirection(FlexDirection::RowReverse),
@@ -188,17 +188,17 @@ impl<'i> DeclarationParser<'i> for StyleParser {
 
             "flex-grow" => Styles::FlexGrow(parse_floaty_mcfloatface_value(input)?),
             "flex-shrink" => Styles::FlexShrink(parse_floaty_mcfloatface_value(input)?),
-            
+
             "flex-wrap" => { let s = input.current_source_location(); let t = input.next()?; match ident(&t) {
                 "no-wrap" => Styles::FlexWrap(FlexWrap::NoWrap),
                 "wrap" => Styles::FlexWrap(FlexWrap::Wrap),
                 "wrap-reverse" => Styles::FlexWrap(FlexWrap::WrapReverse),
                 _ => { return Err(s.new_unexpected_token_error(t.clone())); }
             }},
-            
+
             //FontFamily(FontFamily),
             "font-size" => Styles::FontSize(parse_floaty_mcfloatface_value(input)?),
-            
+
             "font-style" => { let s = input.current_source_location(); let t = input.next()?; match ident(&t) {
                 "normal" => Styles::FontStyle(FontStyle::Normal),
                 "italic" => Styles::FontStyle(FontStyle::Italic),
@@ -211,7 +211,7 @@ impl<'i> DeclarationParser<'i> for StyleParser {
                 "bold" => Styles::FontWeight(FontWeight::Bold),
                 _ => { return Err(s.new_unexpected_token_error(t.clone())); }
             }},
-            
+
             "height" => Styles::Height(parse_floaty_mcfloatface_value(input)?),
 
             "justify-content" => { let s = input.current_source_location(); let t = input.next()?; match ident(&t) {
@@ -223,7 +223,7 @@ impl<'i> DeclarationParser<'i> for StyleParser {
                 "space-evenly" => Styles::JustifyContent(JustifyContent::SpaceEvenly),
                 _ => { return Err(s.new_unexpected_token_error(t.clone())); }
             }},
-            
+
             "left" => Styles::Left(parse_floaty_mcfloatface_value(input)?),
             "line-height" => Styles::FontLineHeight(parse_floaty_mcfloatface_value(input)?),
 
@@ -236,35 +236,35 @@ impl<'i> DeclarationParser<'i> for StyleParser {
 
             "max-height" => Styles::MaxHeight(parse_floaty_mcfloatface_value(input)?),
             "max-width" => Styles::MaxWidth(parse_floaty_mcfloatface_value(input)?),
-            
+
             "min-height" => Styles::MinHeight(parse_floaty_mcfloatface_value(input)?),
             "min-width" => Styles::MinWidth(parse_floaty_mcfloatface_value(input)?),
 
             "opacity" => Styles::Opacity(parse_floaty_mcfloatface_value(input)?),
-            
+
             "overflow" => { let s = input.current_source_location(); let t = input.next()?; match ident(&t) {
                 "visible" => Styles::Overflow(Overflow::Visible),
                 "hidden" => Styles::Overflow(Overflow::Hidden),
                 "scroll" => Styles::Overflow(Overflow::Scroll),
                 _ => { return Err(s.new_unexpected_token_error(t.clone())); }
             }},
-            
+
             "padding-bottom" => Styles::PaddingBottom(parse_floaty_mcfloatface_value(input)?),
             "padding-end" => Styles::PaddingEnd(parse_floaty_mcfloatface_value(input)?),
             "padding-left" => Styles::PaddingLeft(parse_floaty_mcfloatface_value(input)?),
             "padding-right" => Styles::PaddingRight(parse_floaty_mcfloatface_value(input)?),
             "padding-start" => Styles::PaddingStart(parse_floaty_mcfloatface_value(input)?),
             "padding-top" => Styles::PaddingTop(parse_floaty_mcfloatface_value(input)?),
-            
+
             "position" => { let s = input.current_source_location(); let t = input.next()?; match ident(&t) {
                 "absolute" => Styles::PositionType(PositionType::Absolute),
                 "relative" => Styles::PositionType(PositionType::Relative),
                 _ => { return Err(s.new_unexpected_token_error(t.clone())); }
             }},
-            
+
             "right" => Styles::Right(parse_floaty_mcfloatface_value(input)?),
             "start" => Styles::Start(parse_floaty_mcfloatface_value(input)?),
-            
+
             "text-align" => { let s = input.current_source_location(); let t = input.next()?; match ident(&t) {
                 "auto" => Styles::TextAlignment(TextAlignment::Auto),
                 "left" => Styles::TextAlignment(TextAlignment::Left),
@@ -273,14 +273,14 @@ impl<'i> DeclarationParser<'i> for StyleParser {
                 "justify" => Styles::TextAlignment(TextAlignment::Justify),
                 _ => { return Err(s.new_unexpected_token_error(t.clone())); }
             }},
-            
+
             "text-decoration-color" => Styles::TextDecorationColor(Color::parse(input)?),
             "text-shadow-color" => Styles::TextShadowColor(Color::parse(input)?),
             "tint-color" => Styles::TintColor(Color::parse(input)?),
-            
+
             "top" => Styles::Top(parse_floaty_mcfloatface_value(input)?),
             "width" => Styles::Width(parse_floaty_mcfloatface_value(input)?),
-            
+
             t => {
                 let location = input.current_source_location();
                 return Err(location.new_unexpected_token_error(Token::Ident(t.to_string().into())));
@@ -298,7 +298,7 @@ fn parse_floaty_mcfloatface_value<'i, 't>(input: &mut Parser<'i, 't>) -> Result<
     let token = input.next()?;
 
     match token {
-        Token::Number { value, .. } => Ok(*value),    
+        Token::Number { value, .. } => Ok(*value),
         _ => Err(location.new_basic_unexpected_token_error(token.clone()))
     }
 }

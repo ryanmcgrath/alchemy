@@ -51,10 +51,10 @@ impl Color {
     #[inline]
     pub fn new(red: u8, green: u8, blue: u8, alpha: u8) -> Self {
         Color {
-            red: red,
-            green: green,
-            blue: blue,
-            alpha: alpha,
+            red,
+            green,
+            blue,
+            alpha,
         }
     }
 
@@ -81,7 +81,7 @@ impl Color {
     pub fn alpha_f32(&self) -> f32 {
         self.alpha as f32 / 255.0
     }
-    
+
     /// Parse a <color> value, per CSS Color Module Level 3.
     ///
     /// FIXME(#2) Deprecated CSS2 System Colors are not supported yet.
@@ -501,9 +501,9 @@ pub fn parse_color_keyword(ident: &str) -> Result<Color, ()> {
 #[inline]
 fn from_hex(c: u8) -> Result<u8, ()> {
     match c {
-        b'0'...b'9' => Ok(c - b'0'),
-        b'a'...b'f' => Ok(c - b'a' + 10),
-        b'A'...b'F' => Ok(c - b'A' + 10),
+        b'0'..=b'9' => Ok(c - b'0'),
+        b'a'..=b'f' => Ok(c - b'a' + 10),
+        b'A'..=b'F' => Ok(c - b'A' + 10),
         _ => Err(()),
     }
 }
@@ -663,5 +663,5 @@ where
     let red = clamp_unit_f32(hue_to_rgb(m1, m2, hue_times_3 + 1.));
     let green = clamp_unit_f32(hue_to_rgb(m1, m2, hue_times_3));
     let blue = clamp_unit_f32(hue_to_rgb(m1, m2, hue_times_3 - 1.));
-    return Ok((red, green, blue, uses_commas));
+    Ok((red, green, blue, uses_commas))
 }

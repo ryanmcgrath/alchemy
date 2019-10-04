@@ -15,7 +15,7 @@ use core::any::Any;
 #[derive(Debug)]
 pub enum Error {
     InvalidNode(node::Node),
-    Measure(Box<Any>),
+    Measure(Box<dyn Any>),
 }
 
 impl std::fmt::Display for Error {

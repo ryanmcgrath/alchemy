@@ -1,6 +1,6 @@
 //! Handles hoisting per-platform specific Text components.
 //! Each platform needs the freedom to do some specific things,
-//! hence why they're all (somewhat annoyingly, but lovingly) re-implemented 
+//! hence why they're all (somewhat annoyingly, but lovingly) re-implemented
 //! as bridges.
 
 use std::sync::{Mutex};
@@ -22,7 +22,7 @@ pub struct TextProps;
 ///
 /// Views accept styles and event callbacks as props. For example:
 ///
-/// ```
+/// ```ignore
 /// <Text styles=["styleKey1", "styleKey2"] />
 /// ```
 pub struct Text(Mutex<PlatformTextBridge>);
@@ -38,7 +38,7 @@ impl Text {
 }
 
 impl Props for Text {
-    fn set_props(&mut self, _: &mut std::any::Any) {}
+    fn set_props(&mut self, _: &mut dyn std::any::Any) {}
 }
 
 impl Component for Text {
@@ -47,7 +47,7 @@ impl Component for Text {
     }
 
     fn has_native_backing_node(&self) -> bool { true }
-    
+
     fn borrow_native_backing_node(&self) -> Option<PlatformSpecificNodeType> {
         let bridge = self.0.lock().unwrap();
         Some(bridge.borrow_native_backing_node())
@@ -75,10 +75,10 @@ impl Component for Text {
             RSX::VirtualText(s) => s.0.to_owned(),
             _ => String::new()
         }).collect::<String>();
-        
+
         let mut bridge = self.0.lock().unwrap();
         bridge.set_text(text);
-        
+
         Ok(RSX::None)
     }
 }

@@ -1,5 +1,5 @@
-//! This module implements the Application structure and associated 
-//! lifecycle methods. You typically never create this struct yourself; 
+//! This module implements the Application structure and associated
+//! lifecycle methods. You typically never create this struct yourself;
 //! in Alchemy, there's a global `shared_app` that you should use to work
 //! with the `App` struct.
 //!
@@ -28,7 +28,7 @@ impl AppDelegate for DefaultAppDelegate {}
 /// also stored here for easy access.
 pub struct App {
     pub(crate) bridge: Mutex<Option<PlatformAppBridge>>,
-    pub delegate: Mutex<Box<AppDelegate>>,
+    pub delegate: Mutex<Box<dyn AppDelegate>>,
     pub windows: WindowManager
 }
 
@@ -54,7 +54,7 @@ impl App {
         *bridge = Some(PlatformAppBridge::new(ptr));
     }
 
-    /// Convenience method for registering one-off styles. Typically, you would want 
+    /// Convenience method for registering one-off styles. Typically, you would want
     /// to store your stylesheets as separate files, to enable hot-reloading - but it's
     /// conceivable that you might want to just have them in your app, too, and this enables
     /// that use case.
@@ -88,35 +88,35 @@ impl AppDelegate for App {
         let mut delegate = self.delegate.lock().unwrap();
         delegate.will_finish_launching();
     }
-    
+
     /// Called when the application did finish launching.
-    fn did_finish_launching(&mut self) { 
+    fn did_finish_launching(&mut self) {
         let mut delegate = self.delegate.lock().unwrap();
         delegate.did_finish_launching();
     }
 
-    /// Called when the application will become active. We can use this, for instance, 
-    /// to resume rendering cycles and so on. 
+    /// Called when the application will become active. We can use this, for instance,
+    /// to resume rendering cycles and so on.
     fn will_become_active(&mut self) {
         let mut delegate = self.delegate.lock().unwrap();
         delegate.will_become_active();
     }
 
-    /// Called when the application did become active. We can use this, for instance, 
+    /// Called when the application did become active. We can use this, for instance,
     /// to resume rendering cycles and so on.
     fn did_become_active(&mut self) {
         let mut delegate = self.delegate.lock().unwrap();
         delegate.did_become_active();
     }
 
-    /// Called when the application will resigned active. We can use this, for instance, 
+    /// Called when the application will resigned active. We can use this, for instance,
     /// to pause rendering cycles and so on.
     fn will_resign_active(&mut self) {
         let mut delegate = self.delegate.lock().unwrap();
         delegate.will_resign_active();
     }
 
-    /// Called when the application has resigned active. We can use this, for instance, 
+    /// Called when the application has resigned active. We can use this, for instance,
     /// to pause rendering cycles and so on.
     fn did_resign_active(&mut self) {
         let mut delegate = self.delegate.lock().unwrap();
