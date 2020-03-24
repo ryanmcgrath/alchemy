@@ -1,3 +1,8 @@
+# Notice
+This project is on indefinite hiatus for right now. I appreciate the Rust community's interest in GUI frameworks, but this project is personal for me - I worked on it extensively during a time when my younger brother was battling Leukemia, and so returning to it brings up a lot of things that I prefer to take time dealing with.
+
+If you're interested in following work I'm doing in the GUI space with regards to Rust, feel free to follow [appkit-rs](https://github.com/ryanmcgrath/appkit-rs), which would end up being one of the underlying layers of this anyway (much the same way that gtk-rs would need to back, well, Gtk).
+
 <a href="https://alchemy.rs/" title="Alchemy - A Rust GUI Framework"><img src="https://github.com/ryanmcgrath/alchemy/blob/trunk/assets/alchemy_logo_250x.png?raw=true" alt="Potion" /></a>
 
 Alchemy - A Rust GUI Framework
