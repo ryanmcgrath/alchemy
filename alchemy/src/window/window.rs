@@ -24,7 +24,7 @@ pub struct AppWindow {
     pub title: String,
     pub dimensions: (f64, f64, f64, f64),
     pub bridge: PlatformWindowBridge,
-    pub delegate: Box<WindowDelegate>,
+    pub delegate: Box<dyn WindowDelegate>,
     pub render_key: ComponentKey
 }
 
@@ -92,7 +92,7 @@ impl Window {
         let window_id = SHARED_APP.windows.allocate_new_window_id();
         let view = View::default();
         let shared_app_ptr: *const App = &**SHARED_APP;
-        
+
         // This unwrap() is fine, since we implement View ourselves in Alchemy
         let backing_node = view.borrow_native_backing_node().unwrap();
         let bridge = PlatformWindowBridge::new(window_id, backing_node, shared_app_ptr);
@@ -101,13 +101,13 @@ impl Window {
             Ok(key) => key,
             Err(_e) => { panic!("Uhhhh this really messed up"); }
         };
-        
+
         Window(Arc::new(Mutex::new(AppWindow {
             id: window_id,
             style_keys: "".into(),
             title: "".into(),
             dimensions: (0., 0., 0., 0.),
-            bridge: bridge,
+            bridge,
             delegate: Box::new(delegate),
             render_key: key
         })))
@@ -147,7 +147,7 @@ impl Window {
     /// Closes the window, unregistering it from the window manager in the process and ensuring the
     /// necessary delegate method(s) are fired.
     pub fn close(&self) {
-        let window_id = self.0.lock().unwrap().id; 
+        let window_id = self.0.lock().unwrap().id;
         SHARED_APP.windows.will_close(window_id);
         let mut window = self.0.lock().unwrap();
         window.close();

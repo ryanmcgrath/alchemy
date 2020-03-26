@@ -21,7 +21,7 @@ impl GenericRootView {
 }
 
 impl Props for GenericRootView {
-    fn set_props(&mut self, _: &mut Any) {}    
+    fn set_props(&mut self, _: &mut dyn Any) {}
 }
 
 impl Component for GenericRootView {

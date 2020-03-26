@@ -7,7 +7,7 @@
 //! right?
 //!
 //! There's also the fact that a user could opt to close a window. If that happens, we want to be
-//! able to remove it from our structure... hence this manager that acts as a lightweight interface 
+//! able to remove it from our structure... hence this manager that acts as a lightweight interface
 //! for managing per-platform Window instances.
 
 use std::sync::{Arc, Mutex};
@@ -32,7 +32,7 @@ impl WindowManager {
     /// Adds an `AppWindow` to this instance.
     pub(crate) fn add(&self, window: Arc<Mutex<AppWindow>>) {
         let mut windows = self.0.lock().unwrap();
-        if let None = windows.iter().position(|w| Arc::ptr_eq(&w, &window)) {
+        if windows.iter().position(|w| Arc::ptr_eq(&w, &window)).is_none() {
             windows.push(window);
         }
     }
@@ -46,7 +46,7 @@ impl WindowManager {
         let mut windows = self.0.lock().unwrap();
         if let Some(index) = windows.iter().position(|window| {
             let mut w = window.lock().unwrap();
-            
+
             if w.id == window_id {
                 w.delegate.will_close();
                 return true;

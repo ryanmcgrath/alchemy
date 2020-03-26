@@ -1,6 +1,6 @@
-//! Implements tree diffing, updating, and so on. Unlike a lot of the VDom implementations 
-//! you find littered around the web, this is a bit more ECS-ish, and expects Components to retain 
-//! their `ComponentKey` passed in their constructor if they want to update. Doing this 
+//! Implements tree diffing, updating, and so on. Unlike a lot of the VDom implementations
+//! you find littered around the web, this is a bit more ECS-ish, and expects Components to retain
+//! their `ComponentKey` passed in their constructor if they want to update. Doing this
 //! enables us to avoid re-scanning or diffing an entire tree.
 
 use std::sync::Mutex;
@@ -48,12 +48,12 @@ impl RenderEngine {
     // pub fn queue_update_for(&self, component_ptr: usize, updater: Box<Fn() -> Component + Send + Sync + 'static>) {
     // }
 
-    /// `Window`'s (or anything "root" in nature) need to register with the 
+    /// `Window`'s (or anything "root" in nature) need to register with the
     /// reconciler for things like setState to work properly. When they do so,
-    /// they get a key back. When they want to instruct the global `RenderEngine` 
-    /// to re-render or update their tree, they pass that key and whatever the new tree 
+    /// they get a key back. When they want to instruct the global `RenderEngine`
+    /// to re-render or update their tree, they pass that key and whatever the new tree
     /// should be.
-    pub fn register_root_component<C: Component + 'static>(&self, component: C) -> Result<ComponentKey, Box<Error>> {
+    pub fn register_root_component<C: Component + 'static>(&self, component: C) -> Result<ComponentKey, Box<dyn Error>> {
         // Conceivably, this doesn't NEED to be a thing... but for now it is. If you've stumbled
         // upon here, wayward traveler, in need of a non-native-root-component, please open an
         // issue to discuss. :)
@@ -75,7 +75,7 @@ impl RenderEngine {
         Ok(component_key)
     }
 
-    /// Rendering the root node is a bit different than rendering or updating other nodes, as we 
+    /// Rendering the root node is a bit different than rendering or updating other nodes, as we
     /// never want to unmount it, and the results come from a non-`Component` entity (e.g, a
     /// `Window`). Thus, for this one, we do some manual mucking with what we know is the
     /// root view (a `Window` or such root component would call this with it's registered
@@ -85,7 +85,7 @@ impl RenderEngine {
         key: ComponentKey,
         dimensions: (f64, f64),
         child: RSX
-    ) -> Result<(), Box<Error>> {
+    ) -> Result<(), Box<dyn Error>> {
         let mut component_store = self.components.lock().unwrap();
         let mut layout_store = self.layouts.lock().unwrap();
 
@@ -122,7 +122,7 @@ impl RenderEngine {
             width: Number::Defined(dimensions.0 as f32),
             height: Number::Defined(dimensions.1 as f32)
         })?;
-        
+
         walk_and_apply_styles(key, &mut component_store, &mut layout_store)?;
 
         Ok(())
@@ -138,8 +138,8 @@ fn recursively_diff_tree(
     new_tree: RSX,
     component_store: &mut ComponentStore,
     layout_store: &mut LayoutStore
-) -> Result<(), Box<Error>> {
-    // First we need to determine if this node is being replaced or updated. A replace happens if 
+) -> Result<(), Box<dyn Error>> {
+    // First we need to determine if this node is being replaced or updated. A replace happens if
     // two nodes are different types - in this case, we check their tag values. This is also a case
     // where, for instance, if the RSX tag is `::None` or `::VirtualText`, we'll treat it as
     // replacing with nothing.
@@ -173,7 +173,7 @@ fn recursively_diff_tree(
     if let RSX::VirtualNode(mut child) = new_tree {
         for new_child_tree in child.children {
             match old_children.pop() {
-                // If there's a key in the old children for this position, it's 
+                // If there's a key in the old children for this position, it's
                 // something we need to update, so let's recurse right back into it.
                 Some(old_child_key) => {
                     recursively_diff_tree(
@@ -184,7 +184,7 @@ fn recursively_diff_tree(
                     )?;
                 },
 
-                // If there's no matching old key in this position, then we've got a 
+                // If there's no matching old key in this position, then we've got a
                 // new component instance to mount. This part now diverts into the Mount
                 // phase.
                 None => {
@@ -218,17 +218,17 @@ fn recursively_diff_tree(
 /// tree, emitting required lifecycle events and persisting values. This happens in an inward-out
 /// fashion, which helps avoid unnecessary reflow in environments where it can get tricky.
 ///
-/// This method returns a Result, the `Ok` variant containing a tuple of Vecs. These are the child 
+/// This method returns a Result, the `Ok` variant containing a tuple of Vecs. These are the child
 /// Component instances and Layout instances that need to be set in the stores.
 fn mount_component_tree(
     tree: VirtualNode,
     component_store: &mut ComponentStore,
     layout_store: &mut LayoutStore
-) -> Result<ComponentKey, Box<Error>> {
+) -> Result<ComponentKey, Box<dyn Error>> {
     let key = component_store.new_key();
     let component = (tree.create_component_fn)(key);
     let is_native_backed = component.has_native_backing_node();
-    
+
     // let state = get_derived_state_from_props()
     let mut instance = Instance {
         tag: tree.tag,
@@ -243,7 +243,7 @@ fn mount_component_tree(
         THEME_ENGINE.configure_styles_for_keys(&instance.style_keys, &mut style, &mut instance.appearance);
         instance.layout = Some(layout_store.new_node(style, vec![])?);
     }
-    
+
     let rendered = instance.component.render(tree.children);
     // instance.get_snapshot_before_update()
     component_store.insert(key, instance)?;
@@ -258,7 +258,7 @@ fn mount_component_tree(
                 for child_tree in child.children {
                     if let RSX::VirtualNode(child_tree) = child_tree {
                         let child_key = mount_component_tree(child_tree, component_store, layout_store)?;
-                        
+
                         component_store.add_child(key, child_key)?;
                         if is_native_backed {
                             link_layout_nodess(key, child_key, component_store, layout_store)?;
@@ -267,7 +267,7 @@ fn mount_component_tree(
                 }
             } else {
                 let child_key = mount_component_tree(child, component_store, layout_store)?;
-                
+
                 component_store.add_child(key, child_key)?;
                 if is_native_backed {
                     link_layout_nodess(key, child_key, component_store, layout_store)?;
@@ -298,12 +298,12 @@ fn unmount_component_tree(
     key: ComponentKey,
     component_store: &mut ComponentStore,
     layout_store: &mut LayoutStore
-) -> Result<Vec<LayoutNode>, Box<Error>> {
+) -> Result<Vec<LayoutNode>, Box<dyn Error>> {
     let mut instance = component_store.remove(key)?;
     instance.component.component_will_unmount();
-    
+
     let mut layout_nodes = vec![];
-    
+
     let children = component_store.children(key)?;
     for child in children {
         match unmount_component_tree(child, component_store, layout_store) {
@@ -327,8 +327,8 @@ fn unmount_component_tree(
 }
 
 /// Given a tree, will walk the branches until it finds the next root nodes to connect.
-/// While this sounds slow, in practice it rarely has to go far in any direction. This could 
-/// potentially be done away with some hoisting magic in the `mount()` recursion, but I couldn't 
+/// While this sounds slow, in practice it rarely has to go far in any direction. This could
+/// potentially be done away with some hoisting magic in the `mount()` recursion, but I couldn't
 /// find a pattern that didn't feel like some utter magic in Rust.
 ///
 /// It might be because I'm writing this at 3AM. Feel free to improve it.
@@ -337,7 +337,7 @@ fn link_layout_nodess(
     child: ComponentKey,
     components: &mut ComponentStore,
     layouts: &mut LayoutStore
-) -> Result<(), Box<Error>> {
+) -> Result<(), Box<dyn Error>> {
     if let (Ok(parent_instance), Ok(child_instance)) = (components.get(parent), components.get(child)) {
         if let (Some(parent_layout), Some(child_layout)) = (parent_instance.layout, child_instance.layout) {
             layouts.add_child(parent_layout, child_layout)?;
@@ -364,7 +364,7 @@ fn walk_and_apply_styles(
     key: ComponentKey,
     components: &mut ComponentStore,
     layouts: &mut LayoutStore
-) -> Result<(), Box<Error>> {
+) -> Result<(), Box<dyn Error>> {
     let instance = components.get_mut(key)?;
 
     if let Some(layout_key) = instance.layout {

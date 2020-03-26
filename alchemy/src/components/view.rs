@@ -1,6 +1,6 @@
 //! Handles hoisting per-platform specific View components.
 //! Each platform needs the freedom to do some specific things,
-//! hence why they're all (somewhat annoyingly, but lovingly) re-implemented 
+//! hence why they're all (somewhat annoyingly, but lovingly) re-implemented
 //! as bridges.
 
 use std::sync::Mutex;
@@ -24,7 +24,7 @@ pub struct ViewProps;
 ///
 /// Views accept styles and event callbacks as props. For example:
 ///
-/// ```
+/// ```ignore
 /// <View styles=["styleKey1", "styleKey2"] />
 /// ```
 pub struct View {
@@ -46,7 +46,7 @@ impl View {
 }
 
 impl Props for View {
-    fn set_props(&mut self, _: &mut std::any::Any) {}
+    fn set_props(&mut self, _: &mut dyn std::any::Any) {}
 }
 
 impl Component for View {
@@ -55,7 +55,7 @@ impl Component for View {
     }
 
     fn has_native_backing_node(&self) -> bool { true }
-    
+
     fn borrow_native_backing_node(&self) -> Option<PlatformSpecificNodeType> {
         let bridge = self.bridge.lock().unwrap();
         Some(bridge.borrow_native_backing_node())

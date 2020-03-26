@@ -4,4 +4,4 @@
 
 /// A generic Error type that we use. It currently just aliases to `Box<std::error::Error>`,
 /// but could change in the future.
-pub type Error = Box<std::error::Error>;
+pub type Error = Box<dyn std::error::Error>;

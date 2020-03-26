@@ -16,7 +16,7 @@ use crate::stretch::result::{Cache, Layout};
 use crate::stretch::style::*;
 use crate::stretch::Error;
 
-type MeasureFunc = Box<Fn(Size<Number>) -> Result<Size<f32>, Box<Any>> + Send + Sync + 'static>;
+type MeasureFunc = Box<dyn Fn(Size<Number>) -> Result<Size<f32>, Box<dyn Any>> + Send + Sync + 'static>;
 
 lazy_static! {
     /// Global stretch instance id allocator.
